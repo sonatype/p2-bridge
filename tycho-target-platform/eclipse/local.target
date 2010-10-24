@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?pde version="3.5"?>
+
+<target name="P2 local build">
+<locations>
+<location path="/Users/adreghiciu/work/p2install/eclipse" type="Profile"/>
+</locations>
+</target>

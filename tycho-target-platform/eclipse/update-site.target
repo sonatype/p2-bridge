@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?pde version="3.5"?>
+
+<target name="3.6 I-builds">
+<locations>
+<location includeAllPlatforms="false" includeMode="slicer" type="InstallableUnit">
+<unit id="org.eclipse.equinox.p2.user.ui.feature.group" version="2.0.0.v20100222-827FFcfFcLfLxtMpbYFjbkk"/>
+<repository location="http://download.eclipse.org/eclipse/updates/3.6-I-builds"/>
+</location>
+<location path="/Users/adreghiciu/work/p2install/eclipse" type="Profile"/>
+</locations>
+</target>

@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Sonatype P2 Bridge API
+Bundle-SymbolicName: org.sonatype.p2.bridge.api
+Bundle-Version: 1.0.0.qualifier
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Export-Package: org.sonatype.p2.bridge;version="1.0.0"
+Import-Package: org.sonatype.p2.bridge.model;version="[1.0.0,1.1.0)"

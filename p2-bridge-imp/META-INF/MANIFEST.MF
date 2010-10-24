@@ -1,0 +1,28 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Sonatype P2 Bridge Implementation
+Bundle-SymbolicName: org.sonatype.p2.bridge.impl
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Sonatype, Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: org.eclipse.equinox.p2.core;version="[2.0.0,3.0.0)",
+ org.eclipse.equinox.p2.engine;version="[2.0.0,3.0.0)",
+ org.eclipse.equinox.p2.engine.query;version="[2.0.0,3.0.0)",
+ org.eclipse.equinox.p2.metadata;version="[2.1.0,3.0.0)",
+ org.eclipse.equinox.p2.query;version="[2.0.0,3.0.0)",
+ org.eclipse.equinox.p2.repository;version="[2.0.0,3.0.0)",
+ org.eclipse.equinox.p2.repository.artifact;version="[2.0.0,3.0.0)",
+ org.eclipse.equinox.p2.repository.artifact.spi;version="[2.0.0,3.0.0)",
+ org.eclipse.equinox.p2.repository.metadata;version="[2.0.0,3.0.0)",
+ org.eclipse.osgi.framework.log;version="[1.0.0,2.0.0)",
+ org.osgi.framework;version="[1.4.0,2.0.0)",
+ org.sonatype.p2.bridge;version="[1.0.0,1.1)";resolution:=optional,
+ org.sonatype.p2.bridge.model;version="[1.0.0,1.1)"
+Require-Bundle: org.eclipse.equinox.p2.director.app;bundle-version="[1.0.200,2.0.0)",
+ org.eclipse.equinox.common;bundle-version="[3.6.0,4.0.0)",
+ org.eclipse.equinox.p2.publisher;bundle-version="[1.1.0,2.0.0)",
+ org.eclipse.equinox.p2.metadata;bundle-version="[2.0.0,3.0.0)",
+ org.eclipse.equinox.p2.artifact.repository;bundle-version="[1.1.0,2.0.0)",
+ org.eclipse.equinox.p2.core;bundle-version="[2.0.0,3.0.0)"
+Bundle-ActivationPolicy: lazy
+Service-Component: OSGI-INF/p2Director.xml, OSGI-INF/p2ProfileRegistry.xml, OSGI-INF/artifactRepositoryIO.xml, OSGI-INF/bundlePublisher.xml, OSGI-INF/metadataRepositoryIO.xml

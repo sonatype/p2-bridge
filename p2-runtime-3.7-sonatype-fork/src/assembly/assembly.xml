@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (c) 2007-2010 Sonatype, Inc.
+  All rights reserved. This program and the accompanying materials
+  are made available under the terms of the Eclipse Public License v1.0
+  which accompanies this distribution, and is available at
+  http://www.eclipse.org/legal/epl-v10.html
+-->
+<assembly>
+  <id></id>
+  <formats>
+    <format>zip</format>
+  </formats>
+  <includeBaseDirectory>false</includeBaseDirectory>
+  <fileSets>
+    <fileSet>
+      <directory>./src/main/resources/eclipse/configuration</directory>
+      <outputDirectory>/eclipse/configuration</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>./src/main/resources/eclipse/p2</directory>
+      <outputDirectory>/eclipse/p2</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>./src/main/resources/eclipse/plugins</directory>
+      <outputDirectory>/eclipse/plugins</outputDirectory>
+    </fileSet>
+  </fileSets>
+  <files>
+    <file>
+      <source>./src/main/resources/eclipse/artifacts.xml</source>
+      <outputDirectory>/eclipse</outputDirectory>
+    </file>
+    <file>
+      <source>./src/main/resources/.options</source>
+      <outputDirectory>/eclipse</outputDirectory>
+    </file>    
+  </files>
+  <dependencySets>
+    <dependencySet>
+      <outputDirectory>/eclipse/dropins</outputDirectory>
+    </dependencySet>
+  </dependencySets>  
+
+</assembly>
