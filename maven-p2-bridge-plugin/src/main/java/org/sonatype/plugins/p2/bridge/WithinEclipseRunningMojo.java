@@ -12,7 +12,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -157,6 +156,9 @@ public abstract class WithinEclipseRunningMojo
         }
     }
 
+    protected abstract void doWithEclipse( EclipseInstance eclipse )
+        throws MojoExecutionException;
+
     protected Map<String, String> getLaunchProperties()
     {
         final Map<String, String> launchProperties = new HashMap<String, String>();
@@ -166,15 +168,17 @@ public abstract class WithinEclipseRunningMojo
             launchProperties.put( "osgi.debug", p2AgentDirectory.getAbsolutePath() + "/eclipse/.options" );
         }
 
+        // Better implementation that looks up the exported packages from the artifact
+        launchProperties.put(
+            "org.osgi.framework.system.packages.extra",
+            "org.sonatype.p2.bridge;version=\"1.0.0\",org.sonatype.p2.bridge.model;version=\"1.0.0\"" );
+
         return launchProperties;
     }
 
-    protected abstract void doWithEclipse( EclipseInstance eclipse )
-        throws MojoExecutionException;
-
     protected Collection<ArtifactReference> getDefaultEclipsePlugins()
     {
-        return Collections.emptyList();
+        return Arrays.asList( new ArtifactReference[] { getPluginArtifact( "org.sonatype.p2.bridge", "p2-bridge-imp" ) } );
     }
 
     protected ArtifactReference getPluginArtifact( final String groupId, final String artifactId )
@@ -183,19 +187,26 @@ public abstract class WithinEclipseRunningMojo
         {
             if ( groupId.equals( artifact.getGroupId() ) && artifactId.equals( artifact.getArtifactId() ) )
             {
-                return new ArtifactReference( artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion(), artifact.getClassifier(), artifact.getType() );
+                return new ArtifactReference( artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion(),
+                    artifact.getClassifier(), artifact.getType() );
             }
         }
-        throw new RuntimeException( String.format( "Coud not determine required artifact %s:%s from plugin dependencies", groupId, artifactId ) );
+        throw new RuntimeException( String.format(
+            "Coud not determine required artifact %s:%s from plugin dependencies", groupId, artifactId ) );
     }
 
     protected Artifact resolve( final ArtifactReference reference )
     {
         final Artifact requested =
-            repositorySystem.createArtifactWithClassifier( reference.getGroupId(), reference.getArtifactId(), reference.getVersion(), reference.getType(), reference.getClassifier() );
+            repositorySystem.createArtifactWithClassifier( reference.getGroupId(), reference.getArtifactId(),
+                reference.getVersion(), reference.getType(), reference.getClassifier() );
 
         final ArtifactResolutionRequest request =
-            new ArtifactResolutionRequest().setLocalRepository( session.getLocalRepository() ).setRemoteRepositories( getRemoteRepositories() ).setOffline( session.isOffline() ).setForceUpdate( session.getRequest().isUpdateSnapshots() ).setCache( session.getRepositoryCache() ).setServers( session.getRequest().getServers() ).setMirrors( session.getRequest().getMirrors() ).setProxies( session.getRequest().getProxies() ).setArtifact( requested ).setResolveTransitively( false );
+            new ArtifactResolutionRequest().setLocalRepository( session.getLocalRepository() ).setRemoteRepositories(
+                getRemoteRepositories() ).setOffline( session.isOffline() ).setForceUpdate(
+                session.getRequest().isUpdateSnapshots() ).setCache( session.getRepositoryCache() ).setServers(
+                session.getRequest().getServers() ).setMirrors( session.getRequest().getMirrors() ).setProxies(
+                session.getRequest().getProxies() ).setArtifact( requested ).setResolveTransitively( false );
 
         final ArtifactResolutionResult result = repositorySystem.resolve( request );
         try

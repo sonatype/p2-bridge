@@ -12,7 +12,6 @@ import java.io.File;
 import org.sonatype.eclipse.bridge.EclipseInstance;
 import org.sonatype.p2.bridge.IUIdentity;
 import org.sonatype.p2.bridge.P2ProfileRegistry;
-import org.sonatype.p2.bridge.client.P2ProfileRegistryFactory;
 
 /**
  * @goal list-installed
@@ -37,11 +36,6 @@ public class ListInstalledMojo
     /**
      * @component
      */
-    private P2ProfileRegistryFactory p2ProfileRegistryFactory;
-
-    /**
-     * @component
-     */
     private Console console;
 
     @Override
@@ -49,7 +43,7 @@ public class ListInstalledMojo
     {
         console.printHeader( String.format( "Installed in %s :", location.getAbsolutePath() ) );
 
-        final P2ProfileRegistry p2ProfileRegistry = p2ProfileRegistryFactory.create( eclipse );
+        final P2ProfileRegistry p2ProfileRegistry = eclipse.getService( P2ProfileRegistry.class );
 
         final IUIdentity[] installedRoots = p2ProfileRegistry.getInstalledRoots( location, profile );
 

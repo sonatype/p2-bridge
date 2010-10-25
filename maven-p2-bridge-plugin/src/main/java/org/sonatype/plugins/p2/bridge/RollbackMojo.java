@@ -15,8 +15,6 @@ import org.sonatype.p2.bridge.IUIdentity;
 import org.sonatype.p2.bridge.P2Director;
 import org.sonatype.p2.bridge.P2ProfileRegistry;
 import org.sonatype.p2.bridge.ProfileTimestamp;
-import org.sonatype.p2.bridge.client.P2DirectorFactory;
-import org.sonatype.p2.bridge.client.P2ProfileRegistryFactory;
 
 /**
  * @goal rollback
@@ -59,16 +57,6 @@ public class RollbackMojo
     /**
      * @component
      */
-    private P2DirectorFactory p2DirectorFactory;
-
-    /**
-     * @component
-     */
-    private P2ProfileRegistryFactory p2ProfileRegistryFactory;
-
-    /**
-     * @component
-     */
     private Console console;
 
     @Override
@@ -76,8 +64,8 @@ public class RollbackMojo
     {
         console.printHeader( String.format( "Rollback to %s:", timestamp ) );
 
-        final P2Director p2Director = p2DirectorFactory.create( eclipse );
-        final P2ProfileRegistry p2ProfileRegistry = p2ProfileRegistryFactory.create( eclipse );
+        final P2Director p2Director = eclipse.getService( P2Director.class );
+        final P2ProfileRegistry p2ProfileRegistry = eclipse.getService( P2ProfileRegistry.class );
 
         final PluginLogProxy logProxy = new PluginLogProxy( getLog() );
 

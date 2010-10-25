@@ -13,7 +13,6 @@ import org.codehaus.plexus.util.StringUtils;
 import org.sonatype.eclipse.bridge.EclipseInstance;
 import org.sonatype.p2.bridge.P2ProfileRegistry;
 import org.sonatype.p2.bridge.ProfileTimestamp;
-import org.sonatype.p2.bridge.client.P2ProfileRegistryFactory;
 
 /**
  * @goal history
@@ -38,11 +37,6 @@ public class HistoryMojo
     /**
      * @component
      */
-    private P2ProfileRegistryFactory p2ProfileRegistryFactory;
-
-    /**
-     * @component
-     */
     private Console console;
 
     @Override
@@ -50,7 +44,7 @@ public class HistoryMojo
     {
         console.printHeader( String.format( "Location %s history:", location.getAbsolutePath() ) );
 
-        final P2ProfileRegistry p2ProfileRegistry = p2ProfileRegistryFactory.create( eclipse );
+        final P2ProfileRegistry p2ProfileRegistry = eclipse.getService( P2ProfileRegistry.class );
 
         if ( StringUtils.isBlank( profile ) )
         {

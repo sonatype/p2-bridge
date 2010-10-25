@@ -14,7 +14,6 @@ import java.util.List;
 import org.codehaus.plexus.util.StringUtils;
 import org.sonatype.eclipse.bridge.EclipseInstance;
 import org.sonatype.p2.bridge.P2Director;
-import org.sonatype.p2.bridge.client.P2DirectorFactory;
 
 /**
  * @goal install
@@ -56,11 +55,6 @@ public class InstallMojo
     /**
      * @component
      */
-    private P2DirectorFactory p2DirectorFactory;
-
-    /**
-     * @component
-     */
     private Console console;
 
     @Override
@@ -75,7 +69,7 @@ public class InstallMojo
             console.printHeader( String.format( "Installing version %s:", version ) );
         }
 
-        final P2Director p2Director = p2DirectorFactory.create( eclipse );
+        final P2Director p2Director = eclipse.getService( P2Director.class );
 
         final PluginLogProxy logProxy = new PluginLogProxy( getLog() );
 

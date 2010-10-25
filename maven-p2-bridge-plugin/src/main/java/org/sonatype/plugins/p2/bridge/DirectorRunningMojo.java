@@ -14,21 +14,15 @@ import java.util.Map;
 
 import org.sonatype.eclipse.bridge.EclipseInstance;
 import org.sonatype.p2.bridge.P2Director;
-import org.sonatype.p2.bridge.client.P2DirectorFactory;
 
 public abstract class DirectorRunningMojo
     extends WithinEclipseRunningProjectBasedMojo
 {
 
-    /**
-     * @component
-     */
-    private P2DirectorFactory p2DirectorFactory;
-
     @Override
     protected void doWithEclipse( final EclipseInstance eclipse )
     {
-        final P2Director p2Director = p2DirectorFactory.create( eclipse );
+        final P2Director p2Director = eclipse.getService( P2Director.class );
 
         final String[] arguments = getArguments();
 
