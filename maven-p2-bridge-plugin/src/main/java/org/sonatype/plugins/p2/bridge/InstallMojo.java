@@ -26,13 +26,13 @@ public class InstallMojo
 {
 
     /**
-     * @parameter expression="${location}" default-value="${project.build.directory}/tycho-p2/p2-install-folder/p2"
+     * @parameter expression="${location}" default-value="${project.build.directory}/p2/p2-install-folder/p2"
      * @required
      */
     protected File location;
 
     /**
-     * @parameter default-value="tycho-p2"
+     * @parameter default-value="master"
      * @required
      */
     private String profile;

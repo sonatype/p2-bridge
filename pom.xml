@@ -184,9 +184,9 @@
             </dependency>
 
             <dependency>
-                <groupId>org.sonatype.tycho.p2</groupId>
+                <groupId>org.sonatype.p2.touchpoints</groupId>
                 <artifactId>p2-touchpoint-mixin-generic</artifactId>
-                <version>0.1.3-SNAPSHOT</version>
+                <version>1.0.0-SNAPSHOT</version>
             </dependency>
 
         </dependencies>
@@ -223,11 +223,6 @@
                         <packageWithVersion>false</packageWithVersion>
                         <useJava5>true</useJava5>
                     </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.sonatype.maven.plugins</groupId>
-                    <artifactId>maven-p2-publisher-plugin</artifactId>
-                    <version>0.2.1-SNAPSHOT</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

@@ -25,7 +25,7 @@ public class HistoryMojo
 {
 
     /**
-     * @parameter expression="${location}" default-value="${project.build.directory}/tycho-p2/p2-install-folder"
+     * @parameter expression="${location}" default-value="${project.build.directory}/p2/p2-install-folder"
      * @required
      */
     protected File location;
