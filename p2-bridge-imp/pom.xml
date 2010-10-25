@@ -12,9 +12,9 @@
 
     <parent>
         <groupId>org.sonatype.p2.bridge</groupId>
-        <artifactId>tycho-target-platform</artifactId>
+        <artifactId>p2-bridge-tycho-config</artifactId>
         <version>1.0.0-SNAPSHOT</version>
-        <relativePath>../tycho-target-platform</relativePath>
+        <relativePath>../p2-bridge-tycho-config</relativePath>
     </parent>
 
     <artifactId>p2-bridge-imp</artifactId>

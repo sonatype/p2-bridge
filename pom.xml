@@ -31,7 +31,7 @@
         <module>eclipse-bridge</module>
         <module>p2-runtime-3.7-sonatype-fork</module>
 
-        <module>tycho-target-platform</module>
+        <module>p2-bridge-tycho-config</module>
 
         <module>p2-bridge-model</module>
         <module>p2-bridge-api</module>

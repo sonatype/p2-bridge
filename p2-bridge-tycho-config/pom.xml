@@ -16,10 +16,10 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>tycho-target-platform</artifactId>
+    <artifactId>p2-bridge-tycho-config</artifactId>
     <packaging>pom</packaging>
 
-    <name>P2 Bridge :: Tycho Target Platform</name>
+    <name>P2 Bridge :: Tycho Config</name>
 
     <dependencies>
         <dependency>
