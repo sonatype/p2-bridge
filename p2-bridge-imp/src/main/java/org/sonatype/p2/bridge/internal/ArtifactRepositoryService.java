@@ -246,24 +246,7 @@ public class ArtifactRepositoryService
                     "Cannot write artifact repository as created artifact descriptor is not of expected type (ArtifactDescriptor)" );
             }
             addArtifactProperties( artifact, (ArtifactDescriptor) descriptor );
-
-            OutputStream output = repository.getOutputStream( descriptor );
-            if ( output == null )
-            {
-                throw new RuntimeException( String.format(
-                    "Cannot write artifact repository as artifact %s could not be copied", artifact.getPath() ) );
-            }
-            output = new BufferedOutputStream( output );
-            try
-            {
-                FileUtils.copyStream( new BufferedInputStream( new FileInputStream( artifactFile ) ), true, output,
-                    true );
-            }
-            catch ( final Exception e )
-            {
-                throw new RuntimeException( String.format(
-                    "Cannot write artifact repository as artifact %s could not be copied", artifact.getPath() ), e );
-            }
+            repository.addDescriptor( descriptor );
         }
     }
 
