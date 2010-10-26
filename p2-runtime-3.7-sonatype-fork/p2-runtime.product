@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="Runtime Assembler P2 Runtime" uid="org.sonatype.tycho.p2.runtime" id="org.sonatype.tycho.p2.runtime.product" application="org.eclipse.equinox.p2.director" version="1.0.0" useFeatures="false" includeLaunchers="false">
+<product name="Sonatype P2 Fork Runtime" uid="org.sonatype.p2.runtime" id="org.sonatype.p2.runtime.product" application="org.eclipse.equinox.p2.director" version="1.0.0" useFeatures="false" includeLaunchers="false">
 
    <configIni use="default">
    </configIni>
