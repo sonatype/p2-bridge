@@ -13,7 +13,11 @@ import java.util.Map;
 
 import org.sonatype.p2.bridge.model.InstallableUnit;
 
-public interface MetadataRepositoryIO
+public interface MetadataRepository
 {
+
     void write( URI location, final Collection<InstallableUnit> units, String name, Map<String, String> properties );
+
+    Collection<IUIdentity> getGroupIUs( URI location );
+
 }

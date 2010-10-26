@@ -10,9 +10,13 @@ package org.sonatype.p2.bridge.internal;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -27,18 +31,21 @@ import org.eclipse.equinox.p2.metadata.IRequirementChange;
 import org.eclipse.equinox.p2.metadata.ITouchpointType;
 import org.eclipse.equinox.p2.metadata.IUpdateDescriptor;
 import org.eclipse.equinox.p2.metadata.MetadataFactory;
-import org.eclipse.equinox.p2.metadata.Version;
-import org.eclipse.equinox.p2.metadata.VersionRange;
 import org.eclipse.equinox.p2.metadata.MetadataFactory.InstallableUnitDescription;
 import org.eclipse.equinox.p2.metadata.MetadataFactory.InstallableUnitFragmentDescription;
 import org.eclipse.equinox.p2.metadata.MetadataFactory.InstallableUnitPatchDescription;
+import org.eclipse.equinox.p2.metadata.Version;
+import org.eclipse.equinox.p2.metadata.VersionRange;
 import org.eclipse.equinox.p2.metadata.expression.ExpressionUtil;
 import org.eclipse.equinox.p2.metadata.expression.IExpression;
 import org.eclipse.equinox.p2.metadata.expression.IExpressionFactory;
 import org.eclipse.equinox.p2.metadata.expression.IMatchExpression;
+import org.eclipse.equinox.p2.query.IQueryResult;
+import org.eclipse.equinox.p2.query.QueryUtil;
 import org.eclipse.equinox.p2.repository.metadata.IMetadataRepository;
 import org.eclipse.equinox.p2.repository.metadata.IMetadataRepositoryManager;
-import org.sonatype.p2.bridge.MetadataRepositoryIO;
+import org.sonatype.p2.bridge.IUIdentity;
+import org.sonatype.p2.bridge.MetadataRepository;
 import org.sonatype.p2.bridge.model.InstallableUnit;
 import org.sonatype.p2.bridge.model.InstallableUnitArtifact;
 import org.sonatype.p2.bridge.model.InstallableUnitProperty;
@@ -51,8 +58,8 @@ import org.sonatype.p2.bridge.model.TouchpointInstruction;
 import org.sonatype.p2.bridge.model.TouchpointType;
 import org.sonatype.p2.bridge.model.UpdateDescriptor;
 
-public class MetadataRepositoryIOImpl
-    implements MetadataRepositoryIO
+public class MetadataRepositoryService
+    implements MetadataRepository
 {
 
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
@@ -68,14 +75,16 @@ public class MetadataRepositoryIOImpl
 
             if ( provider == null )
             {
-                throw new RuntimeException( "Cannot write metadata repository as there is no provisioning agent provider" );
+                throw new RuntimeException(
+                    "Cannot write metadata repository as there is no provisioning agent provider" );
             }
             final IProvisioningAgent agent = provider.createAgent( location );
             final IMetadataRepositoryManager manager =
                 (IMetadataRepositoryManager) agent.getService( IMetadataRepositoryManager.SERVICE_NAME );
             if ( manager == null )
             {
-                throw new RuntimeException( "Cannot write metadata repository as metadata repository manager coud not be created" );
+                throw new RuntimeException(
+                    "Cannot write metadata repository as metadata repository manager coud not be created" );
             }
             IMetadataRepository repository = null;
             try
@@ -87,7 +96,8 @@ public class MetadataRepositoryIOImpl
             {
                 // repository does not exist. create it
                 repository =
-                    manager.createRepository( location, name, IMetadataRepositoryManager.TYPE_SIMPLE_REPOSITORY, properties );
+                    manager.createRepository( location, name, IMetadataRepositoryManager.TYPE_SIMPLE_REPOSITORY,
+                        properties );
             }
 
             addIUs( repository, units );
@@ -99,6 +109,49 @@ public class MetadataRepositoryIOImpl
         catch ( final ProvisionException e )
         {
             throw new RuntimeException( "Cannot write metadata repository", e );
+        }
+        finally
+        {
+            lock.readLock().unlock();
+        }
+    }
+
+    public Collection<IUIdentity> getGroupIUs( final URI location )
+    {
+        try
+        {
+            lock.readLock().lock();
+
+            if ( provider == null )
+            {
+                throw new RuntimeException(
+                    "Cannot load metadata repository as there is no provisioning agent provider" );
+            }
+            final IProvisioningAgent agent = provider.createAgent( location );
+            final IMetadataRepositoryManager manager =
+                (IMetadataRepositoryManager) agent.getService( IMetadataRepositoryManager.SERVICE_NAME );
+            if ( manager == null )
+            {
+                throw new RuntimeException(
+                    "Cannot load metadata repository as metadata repository manager coud not be created" );
+            }
+            final IMetadataRepository repository = manager.loadRepository( location, null );
+            if ( repository == null )
+            {
+                throw new RuntimeException( "Cannot load artifact repository as repository could not be created" );
+            }
+            final IQueryResult<IInstallableUnit> results = repository.query( QueryUtil.createIUGroupQuery(), null );
+            final Set<IInstallableUnit> sorted = new TreeSet<IInstallableUnit>( results.toUnmodifiableSet() );
+            final Collection<IUIdentity> groups = new HashSet<IUIdentity>();
+            for ( final IInstallableUnit iu : sorted )
+            {
+                groups.add( new IUIdentity( iu.getId(), iu.getVersion().toString() ) );
+            }
+            return Collections.unmodifiableCollection( groups );
+        }
+        catch ( final ProvisionException e )
+        {
+            throw new RuntimeException( "Cannot load metadata repository", e );
         }
         finally
         {
@@ -319,7 +372,9 @@ public class MetadataRepositoryIOImpl
         if ( unitRC.getMatch() == null )
         {
             requirement =
-                MetadataFactory.createRequirement( unitRC.getNamespace(), unitRC.getName(), new VersionRange( unitRC.getRange() ), unitRC.getFilter(), unitRC.isOptional(), unitRC.isMultiple(), unitRC.isGreedy() );
+                MetadataFactory.createRequirement( unitRC.getNamespace(), unitRC.getName(),
+                    new VersionRange( unitRC.getRange() ), unitRC.getFilter(), unitRC.isOptional(),
+                    unitRC.isMultiple(), unitRC.isGreedy() );
         }
         else
         {
@@ -336,12 +391,15 @@ public class MetadataRepositoryIOImpl
                     ExpressionUtil.getOperands( ExpressionUtil.parse( unitRC.getMatchParameters() ) );
                 params = new Object[arrayExpr.length];
                 for ( int idx = 0; idx < arrayExpr.length; ++idx )
+                {
                     params[idx] = arrayExpr[idx].evaluate( null );
+                }
             }
             final IMatchExpression<IInstallableUnit> matchExpr = factory.matchExpression( expr, params );
             // TODO handle filter
             requirement =
-                MetadataFactory.createRequirement( matchExpr, null /* filter */, unitRC.getMin(), unitRC.getMax(), unitRC.isGreedy(), null );
+                MetadataFactory.createRequirement( matchExpr, null /* filter */, unitRC.getMin(), unitRC.getMax(),
+                    unitRC.isGreedy(), null );
         }
         return requirement;
     }
@@ -359,7 +417,8 @@ public class MetadataRepositoryIOImpl
             if ( unitPC != null )
             {
                 final IProvidedCapability providedCapability =
-                    MetadataFactory.createProvidedCapability( unitPC.getNamespace(), unitPC.getName(), Version.create( unitPC.getVersion() ) );
+                    MetadataFactory.createProvidedCapability( unitPC.getNamespace(), unitPC.getName(),
+                        Version.create( unitPC.getVersion() ) );
                 providedCapabilities.add( providedCapability );
             }
         }
@@ -391,7 +450,8 @@ public class MetadataRepositoryIOImpl
             unitUD.getSeverity() == null ? IUpdateDescriptor.NORMAL : Integer.valueOf( unitUD.getSeverity() );
 
         final IUpdateDescriptor updateDescriptor =
-            MetadataFactory.createUpdateDescriptor( unitUD.getId(), new VersionRange( unitUD.getRange() ), severity, null );
+            MetadataFactory.createUpdateDescriptor( unitUD.getId(), new VersionRange( unitUD.getRange() ), severity,
+                null );
 
         description.setUpdateDescriptor( updateDescriptor );
     }

@@ -6,10 +6,10 @@
   which accompanies this distribution, and is available at
   http://www.eclipse.org/legal/epl-v10.html
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.sonatype.p2.bridge.internal.MetadataRepositoryIOImpl">
-   <implementation class="org.sonatype.p2.bridge.internal.MetadataRepositoryIOImpl"/>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.sonatype.p2.bridge.internal.MetadataRepositoryService">
+   <implementation class="org.sonatype.p2.bridge.internal.MetadataRepositoryService"/>
    <reference bind="setProvisioningAgentProvider" cardinality="1..1" interface="org.eclipse.equinox.p2.core.IProvisioningAgentProvider" name="IProvisioningAgentProvider" policy="static" unbind="unsetProvisioningAgentProvider"/>
    <service>
-      <provide interface="org.sonatype.p2.bridge.MetadataRepositoryIO"/>
+      <provide interface="org.sonatype.p2.bridge.MetadataRepository"/>
    </service>
 </scr:component>

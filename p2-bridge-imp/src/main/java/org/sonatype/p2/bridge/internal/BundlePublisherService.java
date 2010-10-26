@@ -32,7 +32,7 @@ import org.sonatype.p2.bridge.model.RequiredCapability;
 import org.sonatype.p2.bridge.model.TouchpointData;
 import org.sonatype.p2.bridge.model.TouchpointInstruction;
 
-public class BundlePublisherImpl
+public class BundlePublisherService
     implements BundlePublisher
 {
 

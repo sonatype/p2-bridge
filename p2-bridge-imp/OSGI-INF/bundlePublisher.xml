@@ -6,8 +6,8 @@
   which accompanies this distribution, and is available at
   http://www.eclipse.org/legal/epl-v10.html
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.sonatype.p2.bridge.internal.BundlePublisherImpl">
-   <implementation class="org.sonatype.p2.bridge.internal.BundlePublisherImpl"/>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.sonatype.p2.bridge.internal.BundlePublisherService">
+   <implementation class="org.sonatype.p2.bridge.internal.BundlePublisherService"/>
    <service>
       <provide interface="org.sonatype.p2.bridge.BundlePublisher"/>
    </service>

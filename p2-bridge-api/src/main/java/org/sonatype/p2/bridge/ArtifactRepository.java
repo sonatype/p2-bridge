@@ -7,16 +7,18 @@
  */
 package org.sonatype.p2.bridge;
 
+import java.io.File;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Map;
 
 import org.sonatype.p2.bridge.model.InstallableArtifact;
 
-
-public interface ArtifactRepositoryIO
+public interface ArtifactRepository
 {
 
     void write( URI uri, final Collection<InstallableArtifact> artifacts, String name, Map<String, String> properties );
+
+    void resolve( File artifactsRepositoryDirectory, ArtifactResolver artifactResolver );
 
 }
