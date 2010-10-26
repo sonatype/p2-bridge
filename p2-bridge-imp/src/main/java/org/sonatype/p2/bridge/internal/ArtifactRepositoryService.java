@@ -230,7 +230,11 @@ public class ArtifactRepositoryService
             final IArtifactKey artifactKey =
                 repository.createArtifactKey( artifact.getClassifier(), artifact.getId(),
                     Version.parseVersion( artifact.getVersion() ) );
-            final File artifactFile = new File( artifact.getPath() );
+            File artifactFile = null;
+            if ( artifact.getPath() != null )
+            {
+                artifactFile = new File( artifact.getPath() );
+            }
 
             final PublisherInfo publisherInfo = new PublisherInfo();
             publisherInfo.setArtifactOptions( IPublisherInfo.A_INDEX | IPublisherInfo.A_PUBLISH
