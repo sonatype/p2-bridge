@@ -16,8 +16,8 @@ Import-Package: org.eclipse.equinox.p2.core;version="[2.0.0,3.0.0)",
  org.eclipse.equinox.p2.repository.metadata;version="[2.0.0,3.0.0)",
  org.eclipse.osgi.framework.log;version="[1.0.0,2.0.0)",
  org.osgi.framework;version="[1.4.0,2.0.0)",
- org.sonatype.p2.bridge;version="[1.0.0,1.1)";resolution:=optional,
- org.sonatype.p2.bridge.model;version="[1.0.0,1.1)"
+ org.sonatype.p2.bridge;version="[1.0.0,1.1.0)";resolution:=optional,
+ org.sonatype.p2.bridge.model;version="[1.0.0,1.1.0)";resolution:=optional
 Require-Bundle: org.eclipse.equinox.p2.director.app;bundle-version="[1.0.200,2.0.0)",
  org.eclipse.equinox.common;bundle-version="[3.6.0,4.0.0)",
  org.eclipse.equinox.p2.publisher;bundle-version="[1.1.0,2.0.0)",
