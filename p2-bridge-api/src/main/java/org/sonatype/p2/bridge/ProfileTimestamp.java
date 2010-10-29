@@ -51,32 +51,8 @@ public class ProfileTimestamp
     @Override
     public String toString()
     {
-        final StringBuilder rootsList = new StringBuilder();
-        final Collection<IUIdentity> roots = getRoots();
-        if ( roots != null && !roots.isEmpty() )
-        {
-            if ( roots.size() == 1 )
-            {
-                rootsList.append( roots.iterator().next().getVersion() );
-            }
-            else
-            {
-                for ( final IUIdentity iu : roots )
-                {
-                    if ( rootsList.length() != 0 )
-                    {
-                        rootsList.append( "," );
-                    }
-                    rootsList.append( iu );
-                }
-            }
-        }
-        else
-        {
-            rootsList.append( "(no roots)" );
-        }
-        return String.format( "%1$tc (id: %1$s) - %2$s - %3$s", getTimestamp(), rootsList.toString(), getTag() == null ? "(No description available)"
-                        : getTag() );
+        return String.format( "%1$tc (id: %1$s) - %2$s", getTimestamp(),
+            getTag() == null ? "(No description available)" : getTag() );
     }
 
 }
