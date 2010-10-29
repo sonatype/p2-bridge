@@ -69,7 +69,8 @@ public class P2DirectorService
                 {
                     message.append( "\n" ).append( "Log file location: " ).append( frameworkLogPath );
                 }
-                throw new RuntimeException( String.format( "P2 provisioning failed to run (error code: %s). Reason: %s", intExitCode, message ) );
+                throw new RuntimeException( String.format(
+                    "P2 provisioning failed to run (error code: %s). Reason: %s", intExitCode, message ) );
             }
         }
         catch ( final NumberFormatException e )
@@ -83,7 +84,8 @@ public class P2DirectorService
                          final Collection<String> repositories, final String tag )
     {
 
-        run( log, "-destination", location.getAbsolutePath(), "-repository", join( repositories ), "-profile", profile, "-profileproperties", join( profileProperties ), "-installIU", iu, "-tag", tag );
+        run( log, "-destination", location.getAbsolutePath(), "-repository", join( repositories ), "-profile", profile,
+            "-profileproperties", join( profileProperties ), "-installIU", iu, "-tag", tag );
     }
 
     public void installSingleton( final LogProxy log, final File location, final String profile,
@@ -99,7 +101,9 @@ public class P2DirectorService
         {
             if ( root.getId().equals( iuId ) )
             {
-                run( log, "-destination", location.getAbsolutePath(), "-repository", join( repositories ), "-profile", profile, "-profileproperties", join( profileProperties ), "-installIU", iu, "-uninstallIU", root.identity(), "-tag", tag );
+                run( log, "-destination", location.getAbsolutePath(), "-repository", join( repositories ), "-profile",
+                    profile, "-profileproperties", join( profileProperties ), "-installIU", iu, "-uninstallIU",
+                    root.identity(), "-tag", tag );
                 existed = true;
                 break;
             }
@@ -116,7 +120,8 @@ public class P2DirectorService
     {
         if ( version == null )
         {
-            run( log, "-destination", location.getAbsolutePath(), "-repository", join( repositories ), "-profile", profile, "-profileproperties", join( profileProperties ), "-updateIUs", "-tag", tag );
+            run( log, "-destination", location.getAbsolutePath(), "-repository", join( repositories ), "-profile",
+                profile, "-profileproperties", join( profileProperties ), "-updateIUs", "-tag", tag );
         }
         else
         {
@@ -126,11 +131,15 @@ public class P2DirectorService
                 final String installIU = String.format( "%s/%s", ius[0].getId(), version );
                 final String uninstallIU = String.format( "%s/%s", ius[0].getId(), ius[0].getVersion() );
 
-                run( log, "-destination", location.getAbsolutePath(), "-repository", join( repositories ), "-profile", profile, "-profileproperties", join( profileProperties ), "-installIU", installIU, "-uninstallIU", uninstallIU, "-tag", tag );
+                run( log, "-destination", location.getAbsolutePath(), "-repository", join( repositories ), "-profile",
+                    profile, "-profileproperties", join( profileProperties ), "-installIU", installIU, "-uninstallIU",
+                    uninstallIU, "-tag", tag );
             }
             else
             {
-                throw new RuntimeException( String.format( "There cannot be more then one root IU in order to upgrade. Specified location contains %s", Arrays.deepToString( ius ) ) );
+                throw new RuntimeException( String.format(
+                    "There cannot be more then one root IU in order to upgrade. Specified location contains %s",
+                    Arrays.deepToString( ius ) ) );
             }
         }
     }
@@ -138,7 +147,17 @@ public class P2DirectorService
     public void rollback( final LogProxy log, final File location, final String profile, final long timestamp,
                           final Collection<String> repositories, final String tag )
     {
-        run( log, "-destination", location.getAbsolutePath(), "-repository", join( repositories ), "-profile", profile, "-revert", String.valueOf( timestamp ), "-tag", tag );
+        run( log, "-destination", location.getAbsolutePath(), "-repository", join( repositories ), "-profile", profile,
+            "-revert", String.valueOf( timestamp ), "-tag", tag );
+    }
+
+    public void uninstall( final LogProxy log, final File location, final String profile,
+                           final Collection<String> profileProperties, final String iu,
+                           final Collection<String> repositories, final String tag )
+    {
+
+        run( log, "-destination", location.getAbsolutePath(), "-repository", join( repositories ), "-profile", profile,
+            "-profileproperties", join( profileProperties ), "-uninstallIU", iu, "-tag", tag );
     }
 
     public IUIdentity[] getAvailableIUs( final LogProxy log, final Collection<String> ius,
@@ -273,7 +292,9 @@ public class P2DirectorService
     private static String join( final Collection<String> toJoin )
     {
         if ( toJoin == null )
+        {
             return null;
+        }
 
         final String separator = ",";
         final StringBuffer buf = new StringBuffer( 256 );

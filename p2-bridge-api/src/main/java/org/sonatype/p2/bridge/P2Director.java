@@ -29,6 +29,10 @@ public interface P2Director
     void rollback( LogProxy log, File location, String profile, long timestamp, Collection<String> repositories,
                    String tag );
 
+    public void uninstall( final LogProxy log, final File location, final String profile,
+                           final Collection<String> profileProperties, final String iu,
+                           final Collection<String> repositories, final String tag );
+
     IUIdentity[] getAvailableIUs( LogProxy log, Collection<String> ius, Collection<String> metadataRepositories );
 
     IUIdentity[] getGroupIUs( LogProxy logProxy, Collection<String> metadataRepositories );
