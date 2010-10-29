@@ -37,7 +37,10 @@ public class LogAdapter
 
     public void log( final String message )
     {
-        log.info( message );
+        if ( log != null )
+        {
+            log.info( message );
+        }
     }
 
     public IStatus getLastLoggedStatus()
