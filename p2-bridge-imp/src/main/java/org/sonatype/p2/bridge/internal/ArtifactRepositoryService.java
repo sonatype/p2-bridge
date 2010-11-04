@@ -78,6 +78,8 @@ public class ArtifactRepositoryService
             {
                 repository = manager.loadRepository( location, null );
                 repository.removeAll();
+                repository.getProperties().clear();
+                repository.getProperties().putAll( properties );
             }
             catch ( final Exception ignore )
             {
