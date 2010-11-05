@@ -7,7 +7,6 @@
  */
 package org.sonatype.p2.bridge;
 
-import java.io.File;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Map;
@@ -17,8 +16,13 @@ import org.sonatype.p2.bridge.model.InstallableArtifact;
 public interface ArtifactRepository
 {
 
-    void write( URI uri, final Collection<InstallableArtifact> artifacts, String name, Map<String, String> properties );
+    static final String TAGS_PROPERTY = "org.sonatype.sisu.assembler.tags";
 
-    void resolve( File artifactsRepositoryDirectory, ArtifactResolver artifactResolver );
+    void write( URI location, final Collection<InstallableArtifact> artifacts, String name,
+                Map<String, String> properties );
+
+    void resolve( URI location, ArtifactResolver artifactResolver );
+
+    Map<String, String> getProperties( URI location );
 
 }

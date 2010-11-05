@@ -17,6 +17,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -60,19 +61,7 @@ public class ArtifactRepositoryService
         {
             lock.readLock().lock();
 
-            if ( provider == null )
-            {
-                throw new RuntimeException(
-                    "Cannot write artifact repository as there is no provisioning agent provider" );
-            }
-            final IProvisioningAgent agent = provider.createAgent( location );
-            final IArtifactRepositoryManager manager =
-                (IArtifactRepositoryManager) agent.getService( IArtifactRepositoryManager.SERVICE_NAME );
-            if ( manager == null )
-            {
-                throw new RuntimeException(
-                    "Cannot write artifact repository as artifact repository manager coud not be created" );
-            }
+            final IArtifactRepositoryManager manager = getManager( location );
             IArtifactRepository repository = null;
             try
             {
@@ -114,31 +103,13 @@ public class ArtifactRepositoryService
         }
     }
 
-    public void resolve( final File artifactsRepositoryDirectory, final ArtifactResolver artifactResolver )
+    public void resolve( final URI location, final ArtifactResolver artifactResolver )
     {
         try
         {
             lock.readLock().lock();
 
-            if ( provider == null )
-            {
-                throw new RuntimeException(
-                    "Cannot load artifact repository as there is no provisioning agent provider" );
-            }
-            final IProvisioningAgent agent =
-                provider.createAgent( new File( artifactsRepositoryDirectory, ".p2" ).toURI() );
-            final IArtifactRepositoryManager manager =
-                (IArtifactRepositoryManager) agent.getService( IArtifactRepositoryManager.SERVICE_NAME );
-            if ( manager == null )
-            {
-                throw new RuntimeException(
-                    "Cannot load artifact repository as artifact repository manager coud not be created" );
-            }
-            final IArtifactRepository repository = manager.loadRepository( artifactsRepositoryDirectory.toURI(), null );
-            if ( repository == null )
-            {
-                throw new RuntimeException( "Cannot load artifact repository as repository could not be created" );
-            }
+            final IArtifactRepository repository = getRepository( location );
             if ( !( repository instanceof SimpleArtifactRepository ) )
             {
                 throw new RuntimeException(
@@ -219,12 +190,63 @@ public class ArtifactRepositoryService
         }
         catch ( final ProvisionException e )
         {
-            throw new RuntimeException( "Cannot write artifact repository", e );
+            throw new RuntimeException( "Cannot resolve artifact repository", e );
         }
         finally
         {
             lock.readLock().unlock();
         }
+    }
+
+    public Map<String, String> getProperties( final URI location )
+    {
+        try
+        {
+            lock.readLock().lock();
+
+            final IArtifactRepository repository = getRepository( location );
+
+            return Collections.unmodifiableMap( repository.getProperties() );
+        }
+        catch ( final ProvisionException e )
+        {
+            throw new RuntimeException( "Cannot read artifact repository", e );
+        }
+        finally
+        {
+            lock.readLock().unlock();
+        }
+    }
+
+    private IArtifactRepository getRepository( final URI location )
+        throws ProvisionException
+    {
+        final IArtifactRepositoryManager manager = getManager( location );
+        final IArtifactRepository repository = manager.loadRepository( location, null );
+        if ( repository == null )
+        {
+            throw new RuntimeException( "Cannot load artifact repository as repository could not be created" );
+        }
+        return repository;
+    }
+
+    private IArtifactRepositoryManager getManager( final URI location )
+        throws ProvisionException
+    {
+        if ( provider == null )
+        {
+            throw new RuntimeException(
+                "Cannot load artifact repository as there is no provisioning agent provider" );
+        }
+        final IProvisioningAgent agent = provider.createAgent( location.resolve( ".p2" ) );
+        final IArtifactRepositoryManager manager =
+            (IArtifactRepositoryManager) agent.getService( IArtifactRepositoryManager.SERVICE_NAME );
+        if ( manager == null )
+        {
+            throw new RuntimeException(
+                "Cannot load artifact repository as artifact repository manager coud not be created" );
+        }
+        return manager;
     }
 
     private void addArtifacts( final Collection<InstallableArtifact> artifacts, final IArtifactRepository repository )

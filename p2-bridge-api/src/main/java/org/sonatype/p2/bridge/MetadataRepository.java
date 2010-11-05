@@ -16,8 +16,12 @@ import org.sonatype.p2.bridge.model.InstallableUnit;
 public interface MetadataRepository
 {
 
+    static final String TAGS_PROPERTY = "org.sonatype.sisu.assembler.tags";
+
     void write( URI location, final Collection<InstallableUnit> units, String name, Map<String, String> properties );
 
     Collection<IUIdentity> getGroupIUs( URI location );
+
+    Map<String, String> getProperties( URI location );
 
 }

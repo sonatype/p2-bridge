@@ -73,19 +73,7 @@ public class MetadataRepositoryService
         {
             lock.readLock().lock();
 
-            if ( provider == null )
-            {
-                throw new RuntimeException(
-                    "Cannot write metadata repository as there is no provisioning agent provider" );
-            }
-            final IProvisioningAgent agent = provider.createAgent( location );
-            final IMetadataRepositoryManager manager =
-                (IMetadataRepositoryManager) agent.getService( IMetadataRepositoryManager.SERVICE_NAME );
-            if ( manager == null )
-            {
-                throw new RuntimeException(
-                    "Cannot write metadata repository as metadata repository manager coud not be created" );
-            }
+            final IMetadataRepositoryManager manager = getManager( location );
             IMetadataRepository repository = null;
             try
             {
@@ -127,24 +115,8 @@ public class MetadataRepositoryService
         {
             lock.readLock().lock();
 
-            if ( provider == null )
-            {
-                throw new RuntimeException(
-                    "Cannot load metadata repository as there is no provisioning agent provider" );
-            }
-            final IProvisioningAgent agent = provider.createAgent( location );
-            final IMetadataRepositoryManager manager =
-                (IMetadataRepositoryManager) agent.getService( IMetadataRepositoryManager.SERVICE_NAME );
-            if ( manager == null )
-            {
-                throw new RuntimeException(
-                    "Cannot load metadata repository as metadata repository manager coud not be created" );
-            }
-            final IMetadataRepository repository = manager.loadRepository( location, null );
-            if ( repository == null )
-            {
-                throw new RuntimeException( "Cannot load artifact repository as repository could not be created" );
-            }
+            final IMetadataRepository repository = getRepository( location );
+
             final IQueryResult<IInstallableUnit> results = repository.query( QueryUtil.createIUGroupQuery(), null );
             final Set<IInstallableUnit> sorted = new TreeSet<IInstallableUnit>( results.toUnmodifiableSet() );
             final Collection<IUIdentity> groups = new HashSet<IUIdentity>();
@@ -162,6 +134,57 @@ public class MetadataRepositoryService
         {
             lock.readLock().unlock();
         }
+    }
+
+    public Map<String, String> getProperties( final URI location )
+    {
+        try
+        {
+            lock.readLock().lock();
+
+            final IMetadataRepository repository = getRepository( location );
+
+            return Collections.unmodifiableMap( repository.getProperties() );
+        }
+        catch ( final ProvisionException e )
+        {
+            throw new RuntimeException( "Cannot load metadata repository", e );
+        }
+        finally
+        {
+            lock.readLock().unlock();
+        }
+    }
+
+    private IMetadataRepository getRepository( final URI location )
+        throws ProvisionException
+    {
+        final IMetadataRepositoryManager manager = getManager( location );
+        final IMetadataRepository repository = manager.loadRepository( location, null );
+        if ( repository == null )
+        {
+            throw new RuntimeException( "Cannot load artifact repository as repository could not be created" );
+        }
+        return repository;
+    }
+
+    private IMetadataRepositoryManager getManager( final URI location )
+        throws ProvisionException
+    {
+        if ( provider == null )
+        {
+            throw new RuntimeException(
+                "Cannot load metadata repository as there is no provisioning agent provider" );
+        }
+        final IProvisioningAgent agent = provider.createAgent( location.resolve( ".p2" ) );
+        final IMetadataRepositoryManager manager =
+            (IMetadataRepositoryManager) agent.getService( IMetadataRepositoryManager.SERVICE_NAME );
+        if ( manager == null )
+        {
+            throw new RuntimeException(
+                "Cannot load metadata repository as metadata repository manager coud not be created" );
+        }
+        return manager;
     }
 
     private void addIUs( final IMetadataRepository repository, final Collection<InstallableUnit> units )
