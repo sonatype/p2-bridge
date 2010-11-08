@@ -14,10 +14,10 @@
          point="org.eclipse.core.runtime.products">
       <product
             application="org.eclipse.equinox.p2.director"
-            name="P2 Runtime">
+            name="Sonatype P2 Fork Runtime">
          <property
                name="appName"
-               value="P2 Runtime">
+               value="Sonatype P2 Fork Runtime">
          </property>
       </product>
    </extension>
