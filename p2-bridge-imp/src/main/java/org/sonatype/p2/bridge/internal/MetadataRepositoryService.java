@@ -21,8 +21,6 @@ import java.util.TreeSet;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.equinox.internal.p2.director.app.DirectorApplication;
 import org.eclipse.equinox.internal.p2.metadata.ArtifactKey;
 import org.eclipse.equinox.p2.core.IProvisioningAgent;
 import org.eclipse.equinox.p2.core.IProvisioningAgentProvider;
@@ -33,22 +31,24 @@ import org.eclipse.equinox.p2.metadata.IRequirement;
 import org.eclipse.equinox.p2.metadata.IRequirementChange;
 import org.eclipse.equinox.p2.metadata.ITouchpointType;
 import org.eclipse.equinox.p2.metadata.IUpdateDescriptor;
+import org.eclipse.equinox.p2.metadata.IVersionedId;
 import org.eclipse.equinox.p2.metadata.MetadataFactory;
 import org.eclipse.equinox.p2.metadata.MetadataFactory.InstallableUnitDescription;
 import org.eclipse.equinox.p2.metadata.MetadataFactory.InstallableUnitFragmentDescription;
 import org.eclipse.equinox.p2.metadata.MetadataFactory.InstallableUnitPatchDescription;
 import org.eclipse.equinox.p2.metadata.Version;
 import org.eclipse.equinox.p2.metadata.VersionRange;
+import org.eclipse.equinox.p2.metadata.VersionedId;
 import org.eclipse.equinox.p2.metadata.expression.ExpressionUtil;
 import org.eclipse.equinox.p2.metadata.expression.IExpression;
 import org.eclipse.equinox.p2.metadata.expression.IExpressionFactory;
 import org.eclipse.equinox.p2.metadata.expression.IMatchExpression;
+import org.eclipse.equinox.p2.query.IQuery;
 import org.eclipse.equinox.p2.query.IQueryResult;
 import org.eclipse.equinox.p2.query.QueryUtil;
 import org.eclipse.equinox.p2.repository.metadata.IMetadataRepository;
 import org.eclipse.equinox.p2.repository.metadata.IMetadataRepositoryManager;
 import org.sonatype.p2.bridge.IUIdentity;
-import org.sonatype.p2.bridge.LogProxy;
 import org.sonatype.p2.bridge.MetadataRepository;
 import org.sonatype.p2.bridge.model.InstallableUnit;
 import org.sonatype.p2.bridge.model.InstallableUnitArtifact;
@@ -113,24 +113,66 @@ public class MetadataRepositoryService
         }
     }
 
-    public Collection<IUIdentity> getGroupIUs( final URI... locations )
+    public Collection<IUIdentity> getGroupIUs( final URI... metadataRepositories )
     {
         try
         {
             lock.readLock().lock();
 
-            final Collection<IMetadataRepository> repositories = getRepositories( locations );
+            final Collection<IMetadataRepository> repositories = getRepositories( metadataRepositories );
 
             final IQueryResult<IInstallableUnit> results =
                 QueryUtil.compoundQueryable( repositories ).query( QueryUtil.createIUGroupQuery(), null );
 
             final Set<IInstallableUnit> sorted = new TreeSet<IInstallableUnit>( results.toUnmodifiableSet() );
-            final Collection<IUIdentity> groups = new HashSet<IUIdentity>();
+            final Collection<IUIdentity> found = new HashSet<IUIdentity>();
             for ( final IInstallableUnit iu : sorted )
             {
-                groups.add( new IUIdentity( iu.getId(), iu.getVersion().toString() ) );
+                found.add( new IUIdentity( iu.getId(), iu.getVersion().toString() ) );
             }
-            return Collections.unmodifiableCollection( groups );
+            return Collections.unmodifiableCollection( found );
+        }
+        catch ( final ProvisionException e )
+        {
+            throw new RuntimeException( "Cannot load metadata repository", e );
+        }
+        finally
+        {
+            lock.readLock().unlock();
+        }
+    }
+
+    public Collection<IUIdentity> getVersions( final Collection<String> ius, final boolean onlyUpdates,
+                                               final URI... metadataRepositories )
+    {
+        try
+        {
+            lock.readLock().lock();
+
+            final Collection<IMetadataRepository> repositories = getRepositories( metadataRepositories );
+            final Collection<IUIdentity> found = new HashSet<IUIdentity>();
+
+            for ( final String spec : ius )
+            {
+                final IVersionedId versionedId = VersionedId.parse( spec );
+                final Version version = versionedId.getVersion();
+                VersionRange range = VersionRange.emptyRange;
+                if ( !Version.emptyVersion.equals( version ) )
+                {
+                    range = new VersionRange( version, !onlyUpdates, onlyUpdates ? null : version, true );
+                }
+                final IQuery<IInstallableUnit> query = QueryUtil.createIUQuery( versionedId.getId(), range );
+
+                final IQueryResult<IInstallableUnit> results =
+                    QueryUtil.compoundQueryable( repositories ).query( query, null );
+
+                final Set<IInstallableUnit> sorted = new TreeSet<IInstallableUnit>( results.toUnmodifiableSet() );
+                for ( final IInstallableUnit iu : sorted )
+                {
+                    found.add( new IUIdentity( iu.getId(), iu.getVersion().toString() ) );
+                }
+            }
+            return Collections.unmodifiableCollection( found );
         }
         catch ( final ProvisionException e )
         {
@@ -160,36 +202,6 @@ public class MetadataRepositoryService
         {
             lock.readLock().unlock();
         }
-    }
-
-    public IUIdentity[] getAvailableIUs( final LogProxy log, final Collection<String> ius,
-                                         final Collection<String> metadataRepositories )
-    {
-        // better use some eclipse api to get director app from registry
-        final DirectorApplication directorApplication = new DirectorApplication();
-
-        final LogAdapter logAdapter = new LogAdapter( log );
-        directorApplication.setLog( logAdapter );
-
-        final Collection<IUIdentity> roots = new ArrayList<IUIdentity>();
-
-        try
-        {
-
-            final Collection<IInstallableUnit> installedRoots =
-                directorApplication.getAvailableIUs( Utils.join( ius ), Utils.join( metadataRepositories ) );
-            for ( final IInstallableUnit iu : installedRoots )
-            {
-                roots.add( new IUIdentity( iu.getId(), iu.getVersion().toString() ) );
-            }
-        }
-        catch ( final CoreException e )
-        {
-            logAdapter.log( e.getStatus() );
-            throw new RuntimeException( e.getMessage() );
-        }
-
-        return roots.toArray( new IUIdentity[roots.size()] );
     }
 
     private Collection<IMetadataRepository> getRepositories( final URI... locations )

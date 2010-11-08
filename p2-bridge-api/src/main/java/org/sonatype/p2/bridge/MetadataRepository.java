@@ -22,7 +22,7 @@ public interface MetadataRepository
 
     Map<String, String> getProperties( URI location );
 
-    IUIdentity[] getAvailableIUs( LogProxy log, Collection<String> ius, Collection<String> metadataRepositories );
+    Collection<IUIdentity> getVersions( Collection<String> ius, boolean onlyUpdates, URI... metadataRepositories );
 
     Collection<IUIdentity> getGroupIUs( URI... metadataRepositories );
 

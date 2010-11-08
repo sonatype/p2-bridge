@@ -8,6 +8,8 @@
 package org.sonatype.plugins.p2.bridge;
 
 import java.io.File;
+import java.net.URI;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -39,6 +41,11 @@ public class ListAvailableMojo
     private String profile;
 
     /**
+     * @parameter default-value="false"
+     */
+    private boolean listAllVersions;
+
+    /**
      * @parameter
      * @required
      */
@@ -57,12 +64,10 @@ public class ListAvailableMojo
         final MetadataRepository metadataRepository = eclipse.getService( MetadataRepository.class );
         final P2ProfileRegistry p2ProfileRegistry = eclipse.getService( P2ProfileRegistry.class );
 
-        final PluginLogProxy logProxy = new PluginLogProxy( getLog() );
-
         final IUIdentity[] installedRoots = p2ProfileRegistry.getInstalledRoots( location, profile );
 
-        final IUIdentity[] availableRoots =
-            metadataRepository.getAvailableIUs( logProxy, toIdSet( installedRoots ), repositories );
+        final Collection<IUIdentity> availableRoots =
+            metadataRepository.getVersions( toIdSet( installedRoots ), !listAllVersions, getRepositoriesAsURIs() );
 
         for ( final IUIdentity iu : availableRoots )
         {
@@ -81,4 +86,16 @@ public class ListAvailableMojo
         }
         return roots;
     }
+
+    private URI[] getRepositoriesAsURIs()
+    {
+        final URI[] uris = new URI[repositories.size()];
+        int i = 0;
+        for ( final String repository : repositories )
+        {
+            uris[i++] = URI.create( repository );
+        }
+        return uris;
+    }
+
 }
