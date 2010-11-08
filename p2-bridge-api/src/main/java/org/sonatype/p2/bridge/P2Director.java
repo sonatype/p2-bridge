@@ -33,8 +33,4 @@ public interface P2Director
                            final Collection<String> profileProperties, final String iu,
                            final Collection<String> repositories, final String tag );
 
-    IUIdentity[] getAvailableIUs( LogProxy log, Collection<String> ius, Collection<String> metadataRepositories );
-
-    IUIdentity[] getGroupIUs( LogProxy logProxy, Collection<String> metadataRepositories );
-
 }

@@ -20,6 +20,8 @@ import java.util.TreeSet;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.equinox.internal.p2.director.app.DirectorApplication;
 import org.eclipse.equinox.internal.p2.metadata.ArtifactKey;
 import org.eclipse.equinox.p2.core.IProvisioningAgent;
 import org.eclipse.equinox.p2.core.IProvisioningAgentProvider;
@@ -45,6 +47,7 @@ import org.eclipse.equinox.p2.query.QueryUtil;
 import org.eclipse.equinox.p2.repository.metadata.IMetadataRepository;
 import org.eclipse.equinox.p2.repository.metadata.IMetadataRepositoryManager;
 import org.sonatype.p2.bridge.IUIdentity;
+import org.sonatype.p2.bridge.LogProxy;
 import org.sonatype.p2.bridge.MetadataRepository;
 import org.sonatype.p2.bridge.model.InstallableUnit;
 import org.sonatype.p2.bridge.model.InstallableUnitArtifact;
@@ -154,6 +157,65 @@ public class MetadataRepositoryService
         {
             lock.readLock().unlock();
         }
+    }
+
+    public IUIdentity[] getAvailableIUs( final LogProxy log, final Collection<String> ius,
+                                         final Collection<String> metadataRepositories )
+    {
+        // better use some eclipse api to get director app from registry
+        final DirectorApplication directorApplication = new DirectorApplication();
+
+        final LogAdapter logAdapter = new LogAdapter( log );
+        directorApplication.setLog( logAdapter );
+
+        final Collection<IUIdentity> roots = new ArrayList<IUIdentity>();
+
+        try
+        {
+
+            final Collection<IInstallableUnit> installedRoots =
+                directorApplication.getAvailableIUs( Utils.join( ius ), Utils.join( metadataRepositories ) );
+            for ( final IInstallableUnit iu : installedRoots )
+            {
+                roots.add( new IUIdentity( iu.getId(), iu.getVersion().toString() ) );
+            }
+        }
+        catch ( final CoreException e )
+        {
+            logAdapter.log( e.getStatus() );
+            throw new RuntimeException( e.getMessage() );
+        }
+
+        return roots.toArray( new IUIdentity[roots.size()] );
+    }
+
+    public IUIdentity[] getGroupIUs( final LogProxy log, final Collection<String> metadataRepositories )
+    {
+        // better use some eclipse api to get director app from registry
+        final DirectorApplication directorApplication = new DirectorApplication();
+
+        final LogAdapter logAdapter = new LogAdapter( log );
+        directorApplication.setLog( logAdapter );
+
+        final Collection<IUIdentity> groups = new ArrayList<IUIdentity>();
+
+        try
+        {
+
+            final Collection<IInstallableUnit> ius =
+                directorApplication.getGroupIUs( Utils.join( metadataRepositories ) );
+            for ( final IInstallableUnit iu : ius )
+            {
+                groups.add( new IUIdentity( iu.getId(), iu.getVersion().toString() ) );
+            }
+        }
+        catch ( final CoreException e )
+        {
+            logAdapter.log( e.getStatus() );
+            throw new RuntimeException( e.getMessage() );
+        }
+
+        return groups.toArray( new IUIdentity[groups.size()] );
     }
 
     private IMetadataRepository getRepository( final URI location )

@@ -24,4 +24,8 @@ public interface MetadataRepository
 
     Map<String, String> getProperties( URI location );
 
+    IUIdentity[] getAvailableIUs( LogProxy log, Collection<String> ius, Collection<String> metadataRepositories );
+
+    IUIdentity[] getGroupIUs( LogProxy logProxy, Collection<String> metadataRepositories );
+
 }

@@ -11,17 +11,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.equinox.internal.p2.director.app.DirectorApplication;
-import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.sonatype.p2.bridge.IUIdentity;
 import org.sonatype.p2.bridge.LogProxy;
@@ -84,8 +78,8 @@ public class P2DirectorService
                          final Collection<String> repositories, final String tag )
     {
 
-        run( log, "-destination", location.getAbsolutePath(), "-repository", join( repositories ), "-profile", profile,
-            "-profileproperties", join( profileProperties ), "-installIU", iu, "-tag", tag );
+        run( log, "-destination", location.getAbsolutePath(), "-repository", Utils.join( repositories ), "-profile",
+            profile, "-profileproperties", Utils.join( profileProperties ), "-installIU", iu, "-tag", tag );
     }
 
     public void installSingleton( final LogProxy log, final File location, final String profile,
@@ -101,9 +95,9 @@ public class P2DirectorService
         {
             if ( root.getId().equals( iuId ) )
             {
-                run( log, "-destination", location.getAbsolutePath(), "-repository", join( repositories ), "-profile",
-                    profile, "-profileproperties", join( profileProperties ), "-installIU", iu, "-uninstallIU",
-                    root.identity(), "-tag", tag );
+                run( log, "-destination", location.getAbsolutePath(), "-repository", Utils.join( repositories ),
+                    "-profile", profile, "-profileproperties", Utils.join( profileProperties ), "-installIU", iu,
+                    "-uninstallIU", root.identity(), "-tag", tag );
                 existed = true;
                 break;
             }
@@ -120,8 +114,8 @@ public class P2DirectorService
     {
         if ( version == null )
         {
-            run( log, "-destination", location.getAbsolutePath(), "-repository", join( repositories ), "-profile",
-                profile, "-profileproperties", join( profileProperties ), "-updateIUs", "-tag", tag );
+            run( log, "-destination", location.getAbsolutePath(), "-repository", Utils.join( repositories ),
+                "-profile", profile, "-profileproperties", Utils.join( profileProperties ), "-updateIUs", "-tag", tag );
         }
         else
         {
@@ -131,9 +125,9 @@ public class P2DirectorService
                 final String installIU = String.format( "%s/%s", ius[0].getId(), version );
                 final String uninstallIU = String.format( "%s/%s", ius[0].getId(), ius[0].getVersion() );
 
-                run( log, "-destination", location.getAbsolutePath(), "-repository", join( repositories ), "-profile",
-                    profile, "-profileproperties", join( profileProperties ), "-installIU", installIU, "-uninstallIU",
-                    uninstallIU, "-tag", tag );
+                run( log, "-destination", location.getAbsolutePath(), "-repository", Utils.join( repositories ),
+                    "-profile", profile, "-profileproperties", Utils.join( profileProperties ), "-installIU",
+                    installIU, "-uninstallIU", uninstallIU, "-tag", tag );
             }
             else
             {
@@ -147,8 +141,8 @@ public class P2DirectorService
     public void rollback( final LogProxy log, final File location, final String profile, final long timestamp,
                           final Collection<String> repositories, final String tag )
     {
-        run( log, "-destination", location.getAbsolutePath(), "-repository", join( repositories ), "-profile", profile,
-            "-revert", String.valueOf( timestamp ), "-tag", tag );
+        run( log, "-destination", location.getAbsolutePath(), "-repository", Utils.join( repositories ), "-profile",
+            profile, "-revert", String.valueOf( timestamp ), "-tag", tag );
     }
 
     public void uninstall( final LogProxy log, final File location, final String profile,
@@ -156,66 +150,8 @@ public class P2DirectorService
                            final Collection<String> repositories, final String tag )
     {
 
-        run( log, "-destination", location.getAbsolutePath(), "-repository", join( repositories ), "-profile", profile,
-            "-profileproperties", join( profileProperties ), "-uninstallIU", iu, "-tag", tag );
-    }
-
-    public IUIdentity[] getAvailableIUs( final LogProxy log, final Collection<String> ius,
-                                         final Collection<String> metadataRepositories )
-    {
-        // better use some eclipse api to get director app from registry
-        final DirectorApplication directorApplication = new DirectorApplication();
-
-        final LogAdapter logAdapter = new LogAdapter( log );
-        directorApplication.setLog( logAdapter );
-
-        final Collection<IUIdentity> roots = new ArrayList<IUIdentity>();
-
-        try
-        {
-
-            final Collection<IInstallableUnit> installedRoots =
-                directorApplication.getAvailableIUs( join( ius ), join( metadataRepositories ) );
-            for ( final IInstallableUnit iu : installedRoots )
-            {
-                roots.add( new IUIdentity( iu.getId(), iu.getVersion().toString() ) );
-            }
-        }
-        catch ( final CoreException e )
-        {
-            logAdapter.log( e.getStatus() );
-            throw new RuntimeException( e.getMessage() );
-        }
-
-        return roots.toArray( new IUIdentity[roots.size()] );
-    }
-
-    public IUIdentity[] getGroupIUs( final LogProxy log, final Collection<String> metadataRepositories )
-    {
-        // better use some eclipse api to get director app from registry
-        final DirectorApplication directorApplication = new DirectorApplication();
-
-        final LogAdapter logAdapter = new LogAdapter( log );
-        directorApplication.setLog( logAdapter );
-
-        final Collection<IUIdentity> groups = new ArrayList<IUIdentity>();
-
-        try
-        {
-
-            final Collection<IInstallableUnit> ius = directorApplication.getGroupIUs( join( metadataRepositories ) );
-            for ( final IInstallableUnit iu : ius )
-            {
-                groups.add( new IUIdentity( iu.getId(), iu.getVersion().toString() ) );
-            }
-        }
-        catch ( final CoreException e )
-        {
-            logAdapter.log( e.getStatus() );
-            throw new RuntimeException( e.getMessage() );
-        }
-
-        return groups.toArray( new IUIdentity[groups.size()] );
+        run( log, "-destination", location.getAbsolutePath(), "-repository", Utils.join( repositories ), "-profile",
+            profile, "-profileproperties", Utils.join( profileProperties ), "-uninstallIU", iu, "-tag", tag );
     }
 
     private StringBuilder extractMessage( final IStatus status, final int level )
@@ -277,37 +213,6 @@ public class P2DirectorService
         {
             // do nothing
         }
-    }
-
-    private Set<String> toIdSet( final IUIdentity[] installedRoots )
-    {
-        final Set<String> roots = new HashSet<String>();
-        for ( final IUIdentity iu : installedRoots )
-        {
-            roots.add( iu.getId() );
-        }
-        return roots;
-    }
-
-    private static String join( final Collection<String> toJoin )
-    {
-        if ( toJoin == null )
-        {
-            return null;
-        }
-
-        final String separator = ",";
-        final StringBuffer buf = new StringBuffer( 256 );
-        final Iterator<String> iterator = toJoin.iterator();
-        while ( iterator.hasNext() )
-        {
-            buf.append( iterator.next() );
-            if ( iterator.hasNext() )
-            {
-                buf.append( separator );
-            }
-        }
-        return buf.toString();
     }
 
 }

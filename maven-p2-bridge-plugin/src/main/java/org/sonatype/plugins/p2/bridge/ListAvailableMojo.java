@@ -14,7 +14,7 @@ import java.util.Set;
 
 import org.sonatype.eclipse.bridge.EclipseInstance;
 import org.sonatype.p2.bridge.IUIdentity;
-import org.sonatype.p2.bridge.P2Director;
+import org.sonatype.p2.bridge.MetadataRepository;
 import org.sonatype.p2.bridge.P2ProfileRegistry;
 
 /**
@@ -54,7 +54,7 @@ public class ListAvailableMojo
     {
         console.printHeader( String.format( "Available versions for %s :", location.getAbsolutePath() ) );
 
-        final P2Director p2Director = eclipse.getService( P2Director.class );
+        final MetadataRepository metadataRepository = eclipse.getService( MetadataRepository.class );
         final P2ProfileRegistry p2ProfileRegistry = eclipse.getService( P2ProfileRegistry.class );
 
         final PluginLogProxy logProxy = new PluginLogProxy( getLog() );
@@ -62,7 +62,7 @@ public class ListAvailableMojo
         final IUIdentity[] installedRoots = p2ProfileRegistry.getInstalledRoots( location, profile );
 
         final IUIdentity[] availableRoots =
-            p2Director.getAvailableIUs( logProxy, toIdSet( installedRoots ), repositories );
+            metadataRepository.getAvailableIUs( logProxy, toIdSet( installedRoots ), repositories );
 
         for ( final IUIdentity iu : availableRoots )
         {
