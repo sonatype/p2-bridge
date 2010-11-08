@@ -64,19 +64,9 @@ public class ListAvailableMojo
         final IUIdentity[] availableRoots =
             p2Director.getAvailableIUs( logProxy, toIdSet( installedRoots ), repositories );
 
-        if ( toIdSet( availableRoots ).size() == 1 )
+        for ( final IUIdentity iu : availableRoots )
         {
-            for ( final IUIdentity iu : availableRoots )
-            {
-                console.print( iu.getVersion() );
-            }
-        }
-        else
-        {
-            for ( final IUIdentity iu : availableRoots )
-            {
-                console.print( iu.toString() );
-            }
+            console.print( iu.toString() );
         }
 
         console.print();
