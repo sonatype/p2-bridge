@@ -20,12 +20,10 @@ public interface MetadataRepository
 
     void write( URI location, final Collection<InstallableUnit> units, String name, Map<String, String> properties );
 
-    Collection<IUIdentity> getGroupIUs( URI location );
-
     Map<String, String> getProperties( URI location );
 
     IUIdentity[] getAvailableIUs( LogProxy log, Collection<String> ius, Collection<String> metadataRepositories );
 
-    IUIdentity[] getGroupIUs( LogProxy logProxy, Collection<String> metadataRepositories );
+    Collection<IUIdentity> getGroupIUs( URI... metadataRepositories );
 
 }

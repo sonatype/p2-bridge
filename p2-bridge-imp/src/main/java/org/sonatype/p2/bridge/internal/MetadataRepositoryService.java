@@ -7,6 +7,7 @@
  */
 package org.sonatype.p2.bridge.internal;
 
+import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -76,7 +77,7 @@ public class MetadataRepositoryService
         {
             lock.readLock().lock();
 
-            final IMetadataRepositoryManager manager = getManager( location );
+            final IMetadataRepositoryManager manager = getManager( location.resolve( ".p2" ) );
             IMetadataRepository repository = null;
             try
             {
@@ -112,15 +113,17 @@ public class MetadataRepositoryService
         }
     }
 
-    public Collection<IUIdentity> getGroupIUs( final URI location )
+    public Collection<IUIdentity> getGroupIUs( final URI... locations )
     {
         try
         {
             lock.readLock().lock();
 
-            final IMetadataRepository repository = getRepository( location );
+            final Collection<IMetadataRepository> repositories = getRepositories( locations );
 
-            final IQueryResult<IInstallableUnit> results = repository.query( QueryUtil.createIUGroupQuery(), null );
+            final IQueryResult<IInstallableUnit> results =
+                QueryUtil.compoundQueryable( repositories ).query( QueryUtil.createIUGroupQuery(), null );
+
             final Set<IInstallableUnit> sorted = new TreeSet<IInstallableUnit>( results.toUnmodifiableSet() );
             final Collection<IUIdentity> groups = new HashSet<IUIdentity>();
             for ( final IInstallableUnit iu : sorted )
@@ -145,7 +148,7 @@ public class MetadataRepositoryService
         {
             lock.readLock().lock();
 
-            final IMetadataRepository repository = getRepository( location );
+            final IMetadataRepository repository = getRepositories( location ).iterator().next();
 
             return Collections.unmodifiableMap( repository.getProperties() );
         }
@@ -189,45 +192,21 @@ public class MetadataRepositoryService
         return roots.toArray( new IUIdentity[roots.size()] );
     }
 
-    public IUIdentity[] getGroupIUs( final LogProxy log, final Collection<String> metadataRepositories )
-    {
-        // better use some eclipse api to get director app from registry
-        final DirectorApplication directorApplication = new DirectorApplication();
-
-        final LogAdapter logAdapter = new LogAdapter( log );
-        directorApplication.setLog( logAdapter );
-
-        final Collection<IUIdentity> groups = new ArrayList<IUIdentity>();
-
-        try
-        {
-
-            final Collection<IInstallableUnit> ius =
-                directorApplication.getGroupIUs( Utils.join( metadataRepositories ) );
-            for ( final IInstallableUnit iu : ius )
-            {
-                groups.add( new IUIdentity( iu.getId(), iu.getVersion().toString() ) );
-            }
-        }
-        catch ( final CoreException e )
-        {
-            logAdapter.log( e.getStatus() );
-            throw new RuntimeException( e.getMessage() );
-        }
-
-        return groups.toArray( new IUIdentity[groups.size()] );
-    }
-
-    private IMetadataRepository getRepository( final URI location )
+    private Collection<IMetadataRepository> getRepositories( final URI... locations )
         throws ProvisionException
     {
-        final IMetadataRepositoryManager manager = getManager( location );
-        final IMetadataRepository repository = manager.loadRepository( location, null );
-        if ( repository == null )
+        final IMetadataRepositoryManager manager = getManager( null );
+        final Collection<IMetadataRepository> repos = new ArrayList<IMetadataRepository>();
+        for ( final URI location : locations )
         {
-            throw new RuntimeException( "Cannot load artifact repository as repository could not be created" );
+            final IMetadataRepository repository = manager.loadRepository( location, null );
+            if ( repository == null )
+            {
+                throw new RuntimeException( "Cannot load metadata repository as repository could not be created" );
+            }
+            repos.add( repository );
         }
-        return repository;
+        return repos;
     }
 
     private IMetadataRepositoryManager getManager( final URI location )
@@ -238,7 +217,15 @@ public class MetadataRepositoryService
             throw new RuntimeException(
                 "Cannot load metadata repository as there is no provisioning agent provider" );
         }
-        final IProvisioningAgent agent = provider.createAgent( location.resolve( ".p2" ) );
+        URI p2AgentLocation = location;
+        if ( p2AgentLocation == null )
+        {
+            final File agentDir = Utils.createTempFile( "org.sonatype.p2.bridge.agent-", "", null );
+            agentDir.mkdirs();
+            agentDir.deleteOnExit();
+            p2AgentLocation = agentDir.toURI();
+        }
+        final IProvisioningAgent agent = provider.createAgent( p2AgentLocation );
         final IMetadataRepositoryManager manager =
             (IMetadataRepositoryManager) agent.getService( IMetadataRepositoryManager.SERVICE_NAME );
         if ( manager == null )
