@@ -45,7 +45,7 @@ public class InstallMojo
     /**
      * @parameter
      */
-    private String version;
+    private String iu;
 
     /**
      * @parameter
@@ -60,14 +60,7 @@ public class InstallMojo
     @Override
     protected void doWithEclipse( final EclipseInstance eclipse )
     {
-        if ( version == null )
-        {
-            console.printHeader( "Upgrading to latest version:" );
-        }
-        else
-        {
-            console.printHeader( String.format( "Installing version %s:", version ) );
-        }
+        console.printHeader( String.format( "Installing %s:", iu ) );
 
         final P2Director p2Director = eclipse.getService( P2Director.class );
 
@@ -75,18 +68,11 @@ public class InstallMojo
 
         if ( StringUtils.isBlank( tag ) )
         {
-            if ( version == null )
-            {
-                tag = "Upgrade to latest version";
-            }
-            else
-            {
-                tag = String.format( "Install version %s", version );
-            }
+            tag = String.format( "Install  %s", iu );
         }
         final List<String> profileProperties =
             Arrays.asList( "org.eclipse.equinox.p2.planner.resolveMetaRequirements=false" );
-        p2Director.updateUniqueRoot( logProxy, location, profile, profileProperties, version, repositories, tag );
+        p2Director.installSingleton( logProxy, location, profile, profileProperties, iu, repositories, tag );
 
         console.print();
     }
