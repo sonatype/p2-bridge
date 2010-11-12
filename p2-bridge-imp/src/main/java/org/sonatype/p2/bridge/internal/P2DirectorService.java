@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.util.Arrays;
 import java.util.Collection;
 
 import org.eclipse.core.runtime.IStatus;
@@ -108,34 +107,12 @@ public class P2DirectorService
         }
     }
 
-    public void updateUniqueRoot( final LogProxy log, final File location, final String profile,
-                                  final Collection<String> profileProperties, final String version,
-                                  final Collection<String> repositories, final String tag )
+    public void update( final LogProxy log, final File location, final String profile,
+                         final Collection<String> profileProperties, final Collection<String> repositories,
+                         final String tag )
     {
-        if ( version == null )
-        {
-            run( log, "-destination", location.getAbsolutePath(), "-repository", Utils.join( repositories ),
-                "-profile", profile, "-profileproperties", Utils.join( profileProperties ), "-updateIUs", "-tag", tag );
-        }
-        else
-        {
-            final IUIdentity[] ius = p2ProfileRegistry.getInstalledRoots( location, profile );
-            if ( ius.length == 1 )
-            {
-                final String installIU = String.format( "%s/%s", ius[0].getId(), version );
-                final String uninstallIU = String.format( "%s/%s", ius[0].getId(), ius[0].getVersion() );
-
-                run( log, "-destination", location.getAbsolutePath(), "-repository", Utils.join( repositories ),
-                    "-profile", profile, "-profileproperties", Utils.join( profileProperties ), "-installIU",
-                    installIU, "-uninstallIU", uninstallIU, "-tag", tag );
-            }
-            else
-            {
-                throw new RuntimeException( String.format(
-                    "There cannot be more then one root IU in order to upgrade. Specified location contains %s",
-                    Arrays.deepToString( ius ) ) );
-            }
-        }
+        run( log, "-destination", location.getAbsolutePath(), "-repository", Utils.join( repositories ), "-profile",
+            profile, "-profileproperties", Utils.join( profileProperties ), "-updateIUs", "-tag", tag );
     }
 
     public void rollback( final LogProxy log, final File location, final String profile, final long timestamp,

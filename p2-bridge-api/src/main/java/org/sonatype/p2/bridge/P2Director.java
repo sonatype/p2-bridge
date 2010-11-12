@@ -23,8 +23,8 @@ public interface P2Director
                                   final Collection<String> profileProperties, final String iu,
                                   final Collection<String> repositories, final String tag );
 
-    void updateUniqueRoot( LogProxy log, File location, String profile, final Collection<String> profileProperties,
-                           String version, Collection<String> repositories, String tag );
+    void update( LogProxy log, File location, String profile, final Collection<String> profileProperties,
+                  Collection<String> repositories, String tag );
 
     void rollback( LogProxy log, File location, String profile, long timestamp, Collection<String> repositories,
                    String tag );
