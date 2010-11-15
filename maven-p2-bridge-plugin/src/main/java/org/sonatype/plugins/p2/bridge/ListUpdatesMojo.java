@@ -24,7 +24,7 @@ import org.sonatype.p2.bridge.P2ProfileRegistry;
  * @phase process-resources
  * @requiresDependencyResolution runtime
  */
-public class ListAvailableMojo
+public class ListUpdatesMojo
     extends WithinEclipseRunningProjectBasedMojo
 {
 

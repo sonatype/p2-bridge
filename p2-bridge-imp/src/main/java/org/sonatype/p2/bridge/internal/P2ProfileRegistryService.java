@@ -56,7 +56,7 @@ public class P2ProfileRegistryService
         }
         catch ( final Exception e )
         {
-            throw new RuntimeException( "Cannot use profile registry", e );
+            throw new RuntimeException( "Cannot use profile registry. Reason: " + e.getMessage(), e );
         }
         finally
         {
@@ -95,7 +95,7 @@ public class P2ProfileRegistryService
         }
         catch ( final Exception e )
         {
-            throw new RuntimeException( "Cannot use profile registry", e );
+            throw new RuntimeException( "Cannot use profile registry. Reason: " + e.getMessage(), e );
         }
         finally
         {
@@ -130,7 +130,7 @@ public class P2ProfileRegistryService
         }
         catch ( final Exception e )
         {
-            throw new RuntimeException( "Cannot use profile registry", e );
+            throw new RuntimeException( "Cannot use profile registry. Reason: " + e.getMessage(), e );
         }
         finally
         {
@@ -150,7 +150,7 @@ public class P2ProfileRegistryService
         }
         catch ( final Exception e )
         {
-            throw new RuntimeException( "Cannot use profile registry", e );
+            throw new RuntimeException( "Cannot use profile registry. Reason: " + e.getMessage(), e );
         }
         finally
         {

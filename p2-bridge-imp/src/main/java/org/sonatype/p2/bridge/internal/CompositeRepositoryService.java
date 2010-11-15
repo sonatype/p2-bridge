@@ -150,7 +150,7 @@ public class CompositeRepositoryService
         }
         catch ( final ProvisionException e )
         {
-            throw new RuntimeException( "Cannot load composite repository", e );
+            throw new RuntimeException( "Cannot load composite repository. Reason: " + e.getMessage(), e );
         }
     }
 
@@ -200,7 +200,7 @@ public class CompositeRepositoryService
         }
         catch ( final ProvisionException e )
         {
-            throw new RuntimeException( "Cannot load composite repository", e );
+            throw new RuntimeException( "Cannot load composite repository. Reason: " + e.getMessage(), e );
         }
     }
 

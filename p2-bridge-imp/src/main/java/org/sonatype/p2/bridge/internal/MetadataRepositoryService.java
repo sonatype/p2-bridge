@@ -105,7 +105,7 @@ public class MetadataRepositoryService
         }
         catch ( final ProvisionException e )
         {
-            throw new RuntimeException( "Cannot write metadata repository", e );
+            throw new RuntimeException( "Cannot write metadata repository. Reason: " + e.getMessage(), e );
         }
         finally
         {
@@ -134,7 +134,7 @@ public class MetadataRepositoryService
         }
         catch ( final ProvisionException e )
         {
-            throw new RuntimeException( "Cannot load metadata repository", e );
+            throw new RuntimeException( "Cannot load metadata repository. Reason: " + e.getMessage(), e );
         }
         finally
         {
@@ -176,7 +176,7 @@ public class MetadataRepositoryService
         }
         catch ( final ProvisionException e )
         {
-            throw new RuntimeException( "Cannot load metadata repository", e );
+            throw new RuntimeException( "Cannot load metadata repository. Reason: " + e.getMessage(), e );
         }
         finally
         {
@@ -196,7 +196,7 @@ public class MetadataRepositoryService
         }
         catch ( final ProvisionException e )
         {
-            throw new RuntimeException( "Cannot load metadata repository", e );
+            throw new RuntimeException( "Cannot load metadata repository. Reason: " + e.getMessage(), e );
         }
         finally
         {
