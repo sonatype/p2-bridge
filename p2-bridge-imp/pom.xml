@@ -13,7 +13,7 @@
     <parent>
         <groupId>org.sonatype.p2.bridge</groupId>
         <artifactId>p2-bridge-tycho-config</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.0.2</version>
         <relativePath>../p2-bridge-tycho-config</relativePath>
     </parent>
 
