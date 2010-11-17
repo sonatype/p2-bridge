@@ -39,6 +39,18 @@
 
         <module>maven-p2-bridge-plugin</module>
     </modules>
+    
+    <organization>
+        <name>Sonatype</name>
+        <url>http://sonatype.org</url>
+    </organization>
+
+    <licenses>
+        <license>
+            <name>Eclipse Public License</name>
+            <url>http://www.eclipse.org/legal/epl-v10.html</url>
+        </license>
+    </licenses>    
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
