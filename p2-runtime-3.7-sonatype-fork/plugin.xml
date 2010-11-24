@@ -8,6 +8,10 @@
       <product
             application="org.eclipse.equinox.p2.director"
             name="Sonatype P2 Fork Runtime">
+         <property
+               name="appName"
+               value="Sonatype P2 Fork Runtime">
+         </property>
       </product>
    </extension>
 </plugin>
