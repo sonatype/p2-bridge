@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Sonatype P2 Bridge Model
+Bundle-SymbolicName: org.sonatype.p2.bridge.model
+Bundle-Version: 1.0.4
+Bundle-Vendor: Sonatype, Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-ActivationPolicy: lazy
+Export-Package: org.sonatype.p2.bridge.model;version="1.0.4"

@@ -6,28 +6,26 @@
   which accompanies this distribution, and is available at
   http://www.eclipse.org/legal/epl-v10.html
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>org.sonatype.p2.bridge</groupId>
-        <artifactId>p2-bridge-aggregator</artifactId>
+        <artifactId>p2-bridge-tycho-config</artifactId>
         <version>1.0.4</version>
+        <relativePath>../p2-bridge-tycho-config</relativePath>
     </parent>
 
-    <artifactId>p2-bridge-tycho-config</artifactId>
-    <packaging>pom</packaging>
+    <artifactId>org.sonatype.p2.bridge.impl</artifactId>
+    <packaging>eclipse-plugin</packaging>
 
-    <name>P2 Bridge :: Tycho Config</name>
-
+    <name>P2 Bridge :: Implementation</name>
+    
     <dependencies>
         <dependency>
             <groupId>org.sonatype.p2.bridge</groupId>
-            <artifactId>p2-runtime</artifactId>
-            <type>zip</type>
-            <scope>runtime</scope>
-            <optional>true</optional>
+            <artifactId>org.sonatype.p2.bridge.model</artifactId>
         </dependency>
     </dependencies>
 
@@ -35,10 +33,15 @@
         <plugins>
             <plugin>
                 <groupId>org.sonatype.tycho</groupId>
-                <artifactId>tycho-maven-plugin</artifactId>
-                <extensions>true</extensions>
+                <artifactId>target-platform-configuration</artifactId>
+                <configuration>
+                    <pomDependencies>consider</pomDependencies>
+                </configuration>
             </plugin>
         </plugins>
-    </build>
+    </build>    
 
 </project>
+
+
+    

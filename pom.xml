@@ -22,7 +22,7 @@
 
     <groupId>org.sonatype.p2.bridge</groupId>
     <artifactId>p2-bridge-aggregator</artifactId>
-    <version>1.0.3-SNAPSHOT</version>
+    <version>1.0.4</version>
     <packaging>pom</packaging>
 
     <name>P2 Bridge :: Aggregator</name>
@@ -33,12 +33,24 @@
 
         <module>p2-bridge-tycho-config</module>
 
-        <module>p2-bridge-model</module>
-        <module>p2-bridge-api</module>
-        <module>p2-bridge-imp</module>
+        <module>org.sonatype.p2.bridge.model</module>
+        <module>org.sonatype.p2.bridge.api</module>
+        <module>org.sonatype.p2.bridge.impl</module>
 
         <module>maven-p2-bridge-plugin</module>
     </modules>
+
+    <organization>
+        <name>Sonatype</name>
+        <url>http://sonatype.org</url>
+    </organization>
+
+    <licenses>
+        <license>
+            <name>Eclipse Public License</name>
+            <url>http://www.eclipse.org/legal/epl-v10.html</url>
+        </license>
+    </licenses>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -59,27 +71,27 @@
             <dependency>
                 <groupId>org.sonatype.p2.bridge</groupId>
                 <artifactId>eclipse-bridge</artifactId>
-                <version>1.0.3-SNAPSHOT</version>
+                <version>1.0.4</version>
             </dependency>
             <dependency>
                 <groupId>org.sonatype.p2.bridge</groupId>
-                <artifactId>p2-bridge-api</artifactId>
-                <version>1.0.3-SNAPSHOT</version>
+                <artifactId>org.sonatype.p2.bridge.api</artifactId>
+                <version>1.0.4</version>
             </dependency>
             <dependency>
                 <groupId>org.sonatype.p2.bridge</groupId>
-                <artifactId>p2-bridge-model</artifactId>
-                <version>1.0.3-SNAPSHOT</version>
+                <artifactId>org.sonatype.p2.bridge.model</artifactId>
+                <version>1.0.4</version>
             </dependency>
             <dependency>
                 <groupId>org.sonatype.p2.bridge</groupId>
-                <artifactId>p2-bridge-imp</artifactId>
-                <version>1.0.3-SNAPSHOT</version>
+                <artifactId>org.sonatype.p2.bridge.impl</artifactId>
+                <version>1.0.4</version>
             </dependency>
             <dependency>
                 <groupId>org.sonatype.p2.bridge</groupId>
                 <artifactId>p2-runtime</artifactId>
-                <version>1.0.3-SNAPSHOT</version>
+                <version>1.0.4</version>
                 <type>zip</type>
             </dependency>
 
@@ -234,6 +246,11 @@
                             <version>0.1.0</version>
                         </dependency>
                     </dependencies>
+                </plugin>
+                <plugin>
+                    <groupId>org.maven.ide.eclipse</groupId>
+                    <artifactId>lifecycle-mapping</artifactId>
+                    <version>${tycho.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.sonatype.tycho</groupId>

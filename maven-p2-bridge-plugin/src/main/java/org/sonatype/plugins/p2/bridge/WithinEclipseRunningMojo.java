@@ -178,7 +178,8 @@ public abstract class WithinEclipseRunningMojo
 
     protected Collection<ArtifactReference> getDefaultEclipsePlugins()
     {
-        return Arrays.asList( new ArtifactReference[] { getPluginArtifact( "org.sonatype.p2.bridge", "p2-bridge-imp" ) } );
+        return Arrays.asList( new ArtifactReference[] { getPluginArtifact( "org.sonatype.p2.bridge",
+            "org.sonatype.p2.bridge.impl" ) } );
     }
 
     protected ArtifactReference getPluginArtifact( final String groupId, final String artifactId )
