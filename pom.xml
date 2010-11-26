@@ -55,7 +55,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <aether.version>1.7</aether.version>
-        <maven.version>3.0-beta-3</maven.version>
+        <maven.version>3.0</maven.version>
         <tycho.version>0.10.0</tycho.version>
         <tycho.targetPlatform>p2-runtime-3.7-sonatype-fork/src/main/resources/repository</tycho.targetPlatform>
     </properties>
