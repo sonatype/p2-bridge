@@ -59,6 +59,32 @@
         </plugins>
     </build>
 
+    <profiles>
+        <profile>
+            <id>m2e</id>
+            <activation>
+                <property>
+                    <name>m2e.version</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.maven.ide.eclipse</groupId>
+                        <artifactId>lifecycle-mapping</artifactId>
+                        <configuration>
+                            <mappingId>customizable</mappingId>
+                            <configurators>
+                                <configurator id="org.maven.ide.eclipse.jdt.javaConfigurator"/>
+                                <configurator id="org.maven.ide.eclipse.modello.modelloConfigurator"/>
+                            </configurators>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
 </project>
 
 

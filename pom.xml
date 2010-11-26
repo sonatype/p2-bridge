@@ -39,7 +39,7 @@
 
         <module>maven-p2-bridge-plugin</module>
     </modules>
-    
+
     <organization>
         <name>Sonatype</name>
         <url>http://sonatype.org</url>
@@ -50,7 +50,7 @@
             <name>Eclipse Public License</name>
             <url>http://www.eclipse.org/legal/epl-v10.html</url>
         </license>
-    </licenses>    
+    </licenses>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -246,6 +246,11 @@
                             <version>0.1.0</version>
                         </dependency>
                     </dependencies>
+                </plugin>
+                <plugin>
+                    <groupId>org.maven.ide.eclipse</groupId>
+                    <artifactId>lifecycle-mapping</artifactId>
+                    <version>${tycho.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.sonatype.tycho</groupId>
