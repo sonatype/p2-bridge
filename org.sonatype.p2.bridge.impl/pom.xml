@@ -17,7 +17,7 @@
         <relativePath>../p2-bridge-tycho-config</relativePath>
     </parent>
 
-    <artifactId>p2-bridge-imp</artifactId>
+    <artifactId>org.sonatype.p2.bridge.impl</artifactId>
     <packaging>eclipse-plugin</packaging>
 
     <name>P2 Bridge :: Implementation</name>
@@ -25,7 +25,7 @@
     <dependencies>
         <dependency>
             <groupId>org.sonatype.p2.bridge</groupId>
-            <artifactId>p2-bridge-model</artifactId>
+            <artifactId>org.sonatype.p2.bridge.model</artifactId>
         </dependency>
     </dependencies>
 

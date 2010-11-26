@@ -16,7 +16,7 @@
         <version>1.0.3-SNAPSHOT</version>
     </parent>
 
-    <artifactId>p2-bridge-model</artifactId>
+    <artifactId>org.sonatype.p2.bridge.model</artifactId>
 
     <name>P2 Bridge :: Model</name>
 
