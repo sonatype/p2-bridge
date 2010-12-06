@@ -3,7 +3,7 @@
 <repository name='Bundle pool' type='org.eclipse.equinox.p2.artifact.repository.simpleRepository' version='1'>
   <properties size='2'>
     <property name='p2.system' value='true'/>
-    <property name='p2.timestamp' value='1290606376507'/>
+    <property name='p2.timestamp' value='1291640629062'/>
   </properties>
   <mappings size='3'>
     <rule filter='(&amp; (classifier=osgi.bundle))' output='${repoUrl}/plugins/${id}_${version}.jar'/>
@@ -11,14 +11,14 @@
     <rule filter='(&amp; (classifier=org.eclipse.update.feature))' output='${repoUrl}/features/${id}_${version}.jar'/>
   </mappings>
   <artifacts size='51'>
-    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.frameworkadmin.equinox' version='1.0.200.201011241540'>
+    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.p2.director' version='2.1.0.201012061501'>
       <properties size='1'>
-        <property name='download.size' value='57547'/>
+        <property name='download.size' value='89456'/>
       </properties>
     </artifact>
-    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.p2.artifact.repository' version='1.1.100.201011241540'>
+    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.p2.artifact.repository' version='1.1.100.201012061501'>
       <properties size='1'>
-        <property name='download.size' value='119493'/>
+        <property name='download.size' value='119486'/>
       </properties>
     </artifact>
     <artifact classifier='osgi.bundle' id='org.eclipse.core.net' version='1.2.100.I20100511-0800'>
@@ -26,14 +26,9 @@
         <property name='download.size' value='65578'/>
       </properties>
     </artifact>
-    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.p2.director.app' version='1.0.300.201011241540'>
+    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.frameworkadmin.equinox' version='1.0.200.201012061501'>
       <properties size='1'>
-        <property name='download.size' value='49331'/>
-      </properties>
-    </artifact>
-    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.p2.extensionlocation' version='1.2.100.201011241540'>
-      <properties size='1'>
-        <property name='download.size' value='29309'/>
+        <property name='download.size' value='57548'/>
       </properties>
     </artifact>
     <artifact classifier='osgi.bundle' id='org.eclipse.equinox.ds' version='1.2.100.v20100830'>
@@ -64,24 +59,14 @@
         <property name='artifact.folder' value='true'/>
       </repositoryProperties>
     </artifact>
-    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.p2.engine' version='2.0.100.201011241540'>
-      <properties size='1'>
-        <property name='download.size' value='175919'/>
-      </properties>
-    </artifact>
-    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.p2.touchpoint.natives' version='1.0.300.201011241540'>
-      <properties size='1'>
-        <property name='download.size' value='46590'/>
-      </properties>
-    </artifact>
     <artifact classifier='osgi.bundle' id='org.apache.commons.codec' version='1.3.0.v20100518-1140'>
       <properties size='1'>
         <property name='download.size' value='55003'/>
       </properties>
     </artifact>
-    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.p2.director' version='2.1.0.201011241540'>
+    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.p2.jarprocessor' version='1.0.200.201012061501'>
       <properties size='1'>
-        <property name='download.size' value='89456'/>
+        <property name='download.size' value='57834'/>
       </properties>
     </artifact>
     <artifact classifier='osgi.bundle' id='org.sat4j.core' version='2.2.0.v20100429'>
@@ -89,14 +74,9 @@
         <property name='download.size' value='165310'/>
       </properties>
     </artifact>
-    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.p2.ql' version='2.0.100.201011241540'>
+    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.frameworkadmin' version='2.0.0.201012061501'>
       <properties size='1'>
-        <property name='download.size' value='3263'/>
-      </properties>
-    </artifact>
-    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.p2.touchpoint.eclipse' version='2.0.100.201011241540'>
-      <properties size='1'>
-        <property name='download.size' value='112610'/>
+        <property name='download.size' value='29965'/>
       </properties>
     </artifact>
     <artifact classifier='osgi.bundle' id='org.eclipse.ecf.provider.filetransfer.ssl' version='1.0.0.v20100906-1425'>
@@ -109,14 +89,29 @@
         <property name='download.size' value='51205'/>
       </properties>
     </artifact>
+    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.simpleconfigurator' version='1.0.200.201012061501'>
+      <properties size='1'>
+        <property name='download.size' value='34630'/>
+      </properties>
+    </artifact>
     <artifact classifier='osgi.bundle' id='org.eclipse.equinox.security' version='1.0.200.v20100503'>
       <properties size='1'>
         <property name='download.size' value='106100'/>
       </properties>
     </artifact>
-    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.p2.core' version='2.0.100.201011241540'>
+    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.simpleconfigurator.manipulator' version='2.0.0.201012061501'>
       <properties size='1'>
-        <property name='download.size' value='63093'/>
+        <property name='download.size' value='18303'/>
+      </properties>
+    </artifact>
+    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.p2.ql' version='2.0.100.201012061501'>
+      <properties size='1'>
+        <property name='download.size' value='3263'/>
+      </properties>
+    </artifact>
+    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.p2.touchpoint.natives' version='1.0.300.201012061501'>
+      <properties size='1'>
+        <property name='download.size' value='46594'/>
       </properties>
     </artifact>
     <artifact classifier='osgi.bundle' id='org.eclipse.equinox.preferences' version='3.3.0.v20100503'>
@@ -129,29 +124,34 @@
         <property name='download.size' value='118874'/>
       </properties>
     </artifact>
-    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.simpleconfigurator' version='1.0.200.201011241540'>
+    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.p2.metadata' version='2.1.0.201012061501'>
       <properties size='1'>
-        <property name='download.size' value='34630'/>
+        <property name='download.size' value='324467'/>
       </properties>
     </artifact>
-    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.p2.jarprocessor' version='1.0.200.201011241540'>
+    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.p2.core' version='2.0.100.201012061501'>
       <properties size='1'>
-        <property name='download.size' value='57835'/>
+        <property name='download.size' value='63093'/>
       </properties>
     </artifact>
-    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.p2.repository' version='2.1.0.201011241540'>
+    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.p2.publisher' version='1.2.0.201012061501'>
       <properties size='1'>
-        <property name='download.size' value='143743'/>
+        <property name='download.size' value='270877'/>
       </properties>
     </artifact>
-    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.p2.reconciler.dropins' version='1.1.100.201011241540'>
+    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.p2.director.app' version='1.0.300.201012061501'>
       <properties size='1'>
-        <property name='download.size' value='42801'/>
+        <property name='download.size' value='49331'/>
       </properties>
     </artifact>
     <artifact classifier='osgi.bundle' id='org.eclipse.equinox.common' version='3.6.0.v20100503'>
       <properties size='1'>
         <property name='download.size' value='101957'/>
+      </properties>
+    </artifact>
+    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.p2.directorywatcher' version='1.0.300.201012061501'>
+      <properties size='1'>
+        <property name='download.size' value='26853'/>
       </properties>
     </artifact>
     <artifact classifier='osgi.bundle' id='org.eclipse.equinox.util' version='1.0.200.v20100503'>
@@ -164,14 +164,14 @@
         <property name='download.size' value='1238863'/>
       </properties>
     </artifact>
-    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.p2.metadata.repository' version='1.1.100.201011241540'>
+    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.p2.repository' version='2.1.0.201012061501'>
       <properties size='1'>
-        <property name='download.size' value='98706'/>
+        <property name='download.size' value='143742'/>
       </properties>
     </artifact>
-    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.p2.console' version='1.0.300.201011241540'>
+    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.p2.reconciler.dropins' version='1.1.100.201012061501'>
       <properties size='1'>
-        <property name='download.size' value='19721'/>
+        <property name='download.size' value='42800'/>
       </properties>
     </artifact>
     <artifact classifier='osgi.bundle' id='org.eclipse.ecf' version='3.1.0.v20100906-1425'>
@@ -189,9 +189,9 @@
         <property name='download.size' value='11557'/>
       </properties>
     </artifact>
-    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.p2.publisher' version='1.2.0.201011241540'>
+    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.p2.metadata.repository' version='1.1.100.201012061501'>
       <properties size='1'>
-        <property name='download.size' value='270887'/>
+        <property name='download.size' value='98710'/>
       </properties>
     </artifact>
     <artifact classifier='osgi.bundle' id='com.jcraft.jsch' version='0.1.41.v200903070017'>
@@ -199,9 +199,9 @@
         <property name='download.size' value='225576'/>
       </properties>
     </artifact>
-    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.p2.directorywatcher' version='1.0.300.201011241540'>
+    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.p2.extensionlocation' version='1.2.100.201012061501'>
       <properties size='1'>
-        <property name='download.size' value='26853'/>
+        <property name='download.size' value='29308'/>
       </properties>
     </artifact>
     <artifact classifier='osgi.bundle' id='org.eclipse.equinox.concurrent' version='1.0.100.v20100503'>
@@ -214,11 +214,6 @@
         <property name='download.size' value='16727'/>
       </properties>
     </artifact>
-    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.p2.garbagecollector' version='1.0.200.201011241540'>
-      <properties size='1'>
-        <property name='download.size' value='19624'/>
-      </properties>
-    </artifact>
     <artifact classifier='osgi.bundle' id='org.sat4j.pb' version='2.2.0.v20100429'>
       <properties size='1'>
         <property name='download.size' value='109003'/>
@@ -227,6 +222,11 @@
     <artifact classifier='osgi.bundle' id='org.eclipse.ecf.identity' version='3.1.0.v20100906-1425'>
       <properties size='1'>
         <property name='download.size' value='54617'/>
+      </properties>
+    </artifact>
+    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.p2.engine' version='2.0.100.201012061501'>
+      <properties size='1'>
+        <property name='download.size' value='175919'/>
       </properties>
     </artifact>
     <artifact classifier='osgi.bundle' id='org.eclipse.osgi.services' version='3.2.100.v20100503'>
@@ -239,14 +239,9 @@
         <property name='download.size' value='125182'/>
       </properties>
     </artifact>
-    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.simpleconfigurator.manipulator' version='2.0.0.201011241540'>
+    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.p2.touchpoint.eclipse' version='2.0.100.201012061501'>
       <properties size='1'>
-        <property name='download.size' value='18304'/>
-      </properties>
-    </artifact>
-    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.frameworkadmin' version='2.0.0.201011241540'>
-      <properties size='1'>
-        <property name='download.size' value='29965'/>
+        <property name='download.size' value='112610'/>
       </properties>
     </artifact>
     <artifact classifier='osgi.bundle' id='org.apache.commons.httpclient' version='3.1.0.v201005080502'>
@@ -259,14 +254,19 @@
         <property name='download.size' value='68425'/>
       </properties>
     </artifact>
+    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.p2.console' version='1.0.300.201012061501'>
+      <properties size='1'>
+        <property name='download.size' value='19721'/>
+      </properties>
+    </artifact>
+    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.p2.garbagecollector' version='1.0.200.201012061501'>
+      <properties size='1'>
+        <property name='download.size' value='19624'/>
+      </properties>
+    </artifact>
     <artifact classifier='osgi.bundle' id='org.eclipse.core.jobs' version='3.5.100.v20100823'>
       <properties size='1'>
         <property name='download.size' value='90862'/>
-      </properties>
-    </artifact>
-    <artifact classifier='osgi.bundle' id='org.eclipse.equinox.p2.metadata' version='2.1.0.201011241540'>
-      <properties size='1'>
-        <property name='download.size' value='324466'/>
       </properties>
     </artifact>
   </artifacts>
