@@ -33,6 +33,7 @@ public interface EclipseInstance
         {
             final Map<String, String> properties = new HashMap<String, String>();
             properties.put( "org.eclipse.equinox.simpleconfigurator.exclusiveInstallation", "false" );
+            properties.put( "osgi.java.profile.bootdelegation", "none" );
             return properties;
         }
     }
