@@ -184,12 +184,18 @@ public abstract class WithinEclipseRunningMojo
 
     protected ArtifactReference getPluginArtifact( final String groupId, final String artifactId )
     {
+        return getPluginArtifact( groupId, artifactId, null );
+    }
+
+    protected ArtifactReference getPluginArtifact( final String groupId, final String artifactId,
+                                                   final String forcedType )
+    {
         for ( final Artifact artifact : pluginArtifacts )
         {
             if ( groupId.equals( artifact.getGroupId() ) && artifactId.equals( artifact.getArtifactId() ) )
             {
                 return new ArtifactReference( artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion(),
-                    artifact.getClassifier(), artifact.getType() );
+                    artifact.getClassifier(), forcedType != null ? forcedType : artifact.getType() );
             }
         }
         throw new RuntimeException( String.format(
