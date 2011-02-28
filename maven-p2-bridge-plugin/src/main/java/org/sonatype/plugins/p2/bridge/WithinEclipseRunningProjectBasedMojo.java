@@ -7,10 +7,16 @@
  */
 package org.sonatype.plugins.p2.bridge;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.model.Dependency;
+import org.apache.maven.model.DependencyManagement;
+import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.util.StringUtils;
+import org.sonatype.aether.repository.RemoteRepository;
 
 public abstract class WithinEclipseRunningProjectBasedMojo
     extends WithinEclipseRunningMojo
@@ -21,12 +27,74 @@ public abstract class WithinEclipseRunningProjectBasedMojo
      * @required
      * @readonly
      */
-    private MavenProject project;
+    protected MavenProject project;
+
+    private Map<String, Dependency> dependencies = null;
 
     @Override
-    protected List<ArtifactRepository> getRemoteRepositories()
+    protected List<RemoteRepository> getRemoteProjectRepositories()
     {
-        return project.getRemoteArtifactRepositories();
+        return project.getRemoteProjectRepositories();
+    }
+
+    protected String resolveVersionFromDependencyManagement( final String groupId, final String artifactId,
+                                                             final String type, final String classifier )
+        throws MojoExecutionException
+    {
+        if ( dependencies == null )
+        {
+            dependencies = new HashMap<String, Dependency>();
+            final DependencyManagement depMngt = project.getDependencyManagement();
+            if ( depMngt != null )
+            {
+                for ( final Dependency dependency : depMngt.getDependencies() )
+                {
+                    final String key =
+                        key( dependency.getGroupId(), dependency.getArtifactId(), dependency.getType(),
+                            dependency.getClassifier() );
+                    dependencies.put( key, dependency );
+                }
+            }
+        }
+
+        // direct match
+        String key = key( groupId, artifactId, type, classifier );
+        Dependency dependency = dependencies.get( key );
+        if ( dependency != null )
+        {
+            return dependency.getVersion();
+        }
+
+        if ( StringUtils.isBlank( type ) )
+        {
+            // default jar type
+            key = key( groupId, artifactId, "jar", classifier );
+            dependency = dependencies.get( key );
+            if ( dependency != null )
+            {
+                return dependency.getVersion();
+            }
+        }
+        throw new MojoExecutionException(
+                        String.format(
+                            "Could not determine version for %s. Specify version in plugin or dependency management section",
+                            key( groupId, artifactId, type, classifier ) ) );
+    }
+
+    private String key( final String groupId, final String artifactId,
+                               final String type, final String classifier )
+    {
+        final StringBuilder key = new StringBuilder();
+        key.append( groupId ).append( ":" ).append( artifactId );
+        if ( type != null )
+        {
+            key.append( ":" ).append( type );
+        }
+        if ( classifier != null )
+        {
+            key.append( ":" ).append( classifier );
+        }
+        return key.toString();
     }
 
 }
