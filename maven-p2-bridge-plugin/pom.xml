@@ -21,6 +21,10 @@
     <packaging>maven-plugin</packaging>
 
     <name>P2 Bridge :: Maven Plugin</name>
+    
+    <prerequisites>
+        <maven>3.0</maven>
+    </prerequisites>
 
     <dependencies>
         <dependency>
