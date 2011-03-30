@@ -22,7 +22,7 @@
 
     <groupId>org.sonatype.p2.bridge</groupId>
     <artifactId>p2-bridge-aggregator</artifactId>
-    <version>1.0.6-SNAPSHOT</version>
+    <version>1.0.6</version>
     <packaging>pom</packaging>
 
     <name>P2 Bridge :: Aggregator</name>
@@ -68,27 +68,27 @@
             <dependency>
                 <groupId>org.sonatype.p2.bridge</groupId>
                 <artifactId>eclipse-bridge</artifactId>
-                <version>1.0.6-SNAPSHOT</version>
+                <version>1.0.6</version>
             </dependency>
             <dependency>
                 <groupId>org.sonatype.p2.bridge</groupId>
                 <artifactId>org.sonatype.p2.bridge.api</artifactId>
-                <version>1.0.6-SNAPSHOT</version>
+                <version>1.0.6</version>
             </dependency>
             <dependency>
                 <groupId>org.sonatype.p2.bridge</groupId>
                 <artifactId>org.sonatype.p2.bridge.model</artifactId>
-                <version>1.0.6-SNAPSHOT</version>
+                <version>1.0.6</version>
             </dependency>
             <dependency>
                 <groupId>org.sonatype.p2.bridge</groupId>
                 <artifactId>org.sonatype.p2.bridge.impl</artifactId>
-                <version>1.0.6-SNAPSHOT</version>
+                <version>1.0.6</version>
             </dependency>
             <dependency>
                 <groupId>org.sonatype.p2.bridge</groupId>
                 <artifactId>p2-runtime</artifactId>
-                <version>1.0.6-SNAPSHOT</version>
+                <version>1.0.6</version>
                 <type>zip</type>
             </dependency>
 
