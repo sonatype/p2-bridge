@@ -16,27 +16,31 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.resolver.ArtifactResolutionException;
-import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
-import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
-import org.apache.maven.artifact.resolver.ResolutionErrorHandler;
+import org.apache.maven.RepositoryUtils;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.repository.RepositorySystem;
+import org.sonatype.aether.RepositorySystem;
+import org.sonatype.aether.RepositorySystemSession;
+import org.sonatype.aether.artifact.Artifact;
+import org.sonatype.aether.repository.RemoteRepository;
+import org.sonatype.aether.resolution.ArtifactRequest;
+import org.sonatype.aether.resolution.ArtifactResolutionException;
+import org.sonatype.aether.resolution.ArtifactResult;
+import org.sonatype.aether.util.artifact.DefaultArtifact;
 import org.sonatype.eclipse.bridge.EclipseBridge;
 import org.sonatype.eclipse.bridge.EclipseInstance;
 import org.sonatype.eclipse.bridge.EclipseLocation;
 import org.sonatype.eclipse.bridge.EclipseLocationFactory;
+import org.sonatype.p2.bridge.ArtifactResolver;
 
-public abstract class WithinEclipseRunningMojo
+abstract class WithinEclipseRunningMojo
     extends AbstractMojo
+    implements ArtifactResolver
 {
 
     /**
-     * @parameter expression="${project.build.directory}/p2-bridge/p2-agent"
+     * @parameter expression="${project.build.directory}/p2/p2-agent"
      * @required
      */
     protected File p2AgentDirectory;
@@ -45,7 +49,7 @@ public abstract class WithinEclipseRunningMojo
      * @parameter expression="${plugin.artifacts}"
      * @readonly
      */
-    private List<Artifact> pluginArtifacts;
+    private List<org.apache.maven.artifact.Artifact> pluginArtifacts;
 
     /**
      * @parameter expression="${session}"
@@ -70,19 +74,20 @@ public abstract class WithinEclipseRunningMojo
     private ArtifactReference[] eclipsePlugins;
 
     /**
-     * @parameter expression="${p2.bridge.eclipse.debug}" default-value="false"
+     * @parameter expression="${sisu.assembler.eclipse.debug}" default-value="false"
      */
     protected boolean debugEclipse;
 
     /**
      * @component
      */
-    private RepositorySystem repositorySystem;
+    private RepositorySystem aetherRepositorySystem;
 
     /**
-     * @component
+     * @parameter expression="${repositorySystemSession}"
+     * @readonly
      */
-    private ResolutionErrorHandler resolutionErrorHandler;
+    private RepositorySystemSession aetherRepositorySystemSession;
 
     /**
      * @component
@@ -108,13 +113,16 @@ public abstract class WithinEclipseRunningMojo
                 eclipseArchive.setVersion( eclipseVersion );
             }
         }
-        final Artifact eclipseArchiveArtifact = resolve( eclipseArchive );
-        getLog().debug( String.format( "Using eclipse runtime artifact %s", eclipseArchiveArtifact ) );
-        final File eclipseArchiveFile = eclipseArchiveArtifact.getFile();
-        if ( eclipseArchiveFile == null )
+        File eclipseArchiveFile;
+        try
         {
-            throw new RuntimeException( "Coud not resolve eclipse runtime" );
+            eclipseArchiveFile = resolveArtifactFile( eclipseArchive );
         }
+        catch ( final ArtifactResolutionException e )
+        {
+            throw new MojoExecutionException( "Coud not resolve eclipse runtime", e );
+        }
+        getLog().debug( String.format( "Using eclipse runtime %s", eclipseArchive ) );
 
         final Collection<URI> eclipsePluginFiles = new ArrayList<URI>();
         final Collection<ArtifactReference> eclipsePluginRefs = new ArrayList<ArtifactReference>();
@@ -126,11 +134,15 @@ public abstract class WithinEclipseRunningMojo
 
         for ( final ArtifactReference reference : eclipsePluginRefs )
         {
-            final Artifact eclipsePluginArtifact = resolve( reference );
-            final File eclipsePluginFile = eclipsePluginArtifact.getFile();
-            if ( eclipsePluginFile == null )
+            File eclipsePluginFile;
+            try
             {
-                throw new RuntimeException( String.format( "Coud not resolve eclipse plugin %s", eclipsePluginArtifact ) );
+                eclipsePluginFile = resolveArtifactFile( reference );
+            }
+            catch ( final ArtifactResolutionException e )
+            {
+                throw new MojoExecutionException( String.format( "Coud not resolve eclipse plugin %s",
+                    reference ), e );
             }
             eclipsePluginFiles.add( eclipsePluginFile.toURI() );
         }
@@ -171,7 +183,7 @@ public abstract class WithinEclipseRunningMojo
         // Better implementation that looks up the exported packages from the artifact
         launchProperties.put(
             "org.osgi.framework.system.packages.extra",
-            "org.sonatype.p2.bridge;version=\"1.0.0\",org.sonatype.p2.bridge.model;version=\"1.0.0\"" );
+            "org.sonatype.p2.bridge;version=\"1.0.5\",org.sonatype.p2.bridge.model;version=\"1.0.5\"" );
 
         return launchProperties;
     }
@@ -179,53 +191,177 @@ public abstract class WithinEclipseRunningMojo
     protected Collection<ArtifactReference> getDefaultEclipsePlugins()
     {
         return Arrays.asList( new ArtifactReference[] { getPluginArtifact( "org.sonatype.p2.bridge",
-            "org.sonatype.p2.bridge.impl" ) } );
+            "org.sonatype.p2.bridge.impl", "jar" ) } );
     }
 
     protected ArtifactReference getPluginArtifact( final String groupId, final String artifactId )
     {
-        for ( final Artifact artifact : pluginArtifacts )
+        return getPluginArtifact( groupId, artifactId, null );
+    }
+
+    protected ArtifactReference getPluginArtifact( final String groupId, final String artifactId,
+                                                   final String forcedType )
+    {
+        for ( final org.apache.maven.artifact.Artifact artifact : pluginArtifacts )
         {
             if ( groupId.equals( artifact.getGroupId() ) && artifactId.equals( artifact.getArtifactId() ) )
             {
                 return new ArtifactReference( artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion(),
-                    artifact.getClassifier(), artifact.getType() );
+                    artifact.getClassifier(), forcedType != null ? forcedType : artifact.getType() );
             }
         }
         throw new RuntimeException( String.format(
             "Coud not determine required artifact %s:%s from plugin dependencies", groupId, artifactId ) );
     }
 
-    protected Artifact resolve( final ArtifactReference reference )
+    protected Artifact resolveArtifact( final ArtifactReference reference )
+        throws ArtifactResolutionException
     {
-        final Artifact requested =
-            repositorySystem.createArtifactWithClassifier( reference.getGroupId(), reference.getArtifactId(),
-                reference.getVersion(), reference.getType(), reference.getClassifier() );
-
-        final ArtifactResolutionRequest request =
-            new ArtifactResolutionRequest().setLocalRepository( session.getLocalRepository() ).setRemoteRepositories(
-                getRemoteRepositories() ).setOffline( session.isOffline() ).setForceUpdate(
-                session.getRequest().isUpdateSnapshots() ).setCache( session.getRepositoryCache() ).setServers(
-                session.getRequest().getServers() ).setMirrors( session.getRequest().getMirrors() ).setProxies(
-                session.getRequest().getProxies() ).setArtifact( requested ).setResolveTransitively( false );
-
-        final ArtifactResolutionResult result = repositorySystem.resolve( request );
-        try
-        {
-            resolutionErrorHandler.throwErrors( request, result );
-        }
-        catch ( final ArtifactResolutionException e )
-        {
-            throw new RuntimeException( e );
-        }
-
-        final Artifact resolved = result.getArtifacts().iterator().next();
-        return resolved;
+        return resolveArtifact( reference.getGroupId(), reference.getArtifactId(), reference.getVersion(),
+            reference.getType(), reference.getClassifier() );
     }
 
-    protected List<ArtifactRepository> getRemoteRepositories()
+    protected File resolveArtifactFile( final ArtifactReference reference )
+        throws ArtifactResolutionException
     {
-        return session.getProjectBuildingRequest().getRemoteRepositories();
+        return resolveArtifactFile( reference.getGroupId(), reference.getArtifactId(), reference.getVersion(),
+            reference.getType(), reference.getClassifier() );
+    }
+
+    public Artifact resolveArtifact( final String groupId, final String artifactId, final String version,
+                                     final String extension, final String classifier )
+        throws ArtifactResolutionException
+    {
+        final ArtifactRequest artifactRequest = new ArtifactRequest();
+        final DefaultArtifact artifact = new DefaultArtifact( groupId, artifactId, classifier, extension, version );
+
+        artifactRequest.setArtifact( artifact );
+        artifactRequest.setRepositories( getRemoteProjectRepositories() );
+        final ArtifactResult result =
+            aetherRepositorySystem.resolveArtifact( aetherRepositorySystemSession, artifactRequest );
+        return result.getArtifact();
+    }
+
+    public File resolveArtifactFile( final String groupId, final String artifactId, final String version,
+                                     final String extension, final String classifier )
+        throws ArtifactResolutionException
+    {
+        final Artifact artifact = resolveArtifact( groupId, artifactId, version, extension, classifier );
+        return artifact.getFile();
+    }
+
+    protected List<RemoteRepository> getRemoteProjectRepositories()
+    {
+        return RepositoryUtils.toRepos( session.getProjectBuildingRequest().getRemoteRepositories() );
+    }
+
+    static class ArtifactReference
+    {
+
+        private String groupId;
+
+        private String artifactId;
+
+        private String version;
+
+        private String classifier;
+
+        private String type;
+
+        public ArtifactReference()
+        {
+        }
+
+        ArtifactReference( final String groupId, final String artifactId, final String version )
+        {
+            this( groupId, artifactId, version, null, "jar" );
+        }
+
+        ArtifactReference( final String groupId, final String artifactId, final String version,
+                                  final String classifier, final String type )
+        {
+            this.groupId = groupId;
+            this.artifactId = artifactId;
+            this.version = version;
+            this.classifier = classifier;
+            this.type = type;
+        }
+
+        String getGroupId()
+        {
+            return groupId;
+        }
+
+        void setGroupId( final String groupId )
+        {
+            this.groupId = groupId;
+        }
+
+        String getArtifactId()
+        {
+            return artifactId;
+        }
+
+        void setArtifactId( final String artifactId )
+        {
+            this.artifactId = artifactId;
+        }
+
+        String getVersion()
+        {
+            return version;
+        }
+
+        void setVersion( final String version )
+        {
+            this.version = version;
+        }
+
+        void setType( final String type )
+        {
+            this.type = type;
+        }
+
+        String getType()
+        {
+            return type;
+        }
+
+        void setClassifier( final String classifier )
+        {
+            this.classifier = classifier;
+        }
+
+        String getClassifier()
+        {
+            return classifier;
+        }
+
+        @Override
+        public String toString()
+        {
+            final StringBuilder builder = new StringBuilder();
+            builder.append( groupId );
+            builder.append( ":" );
+            builder.append( artifactId );
+            if ( version != null )
+            {
+                builder.append( ":" );
+                builder.append( version );
+            }
+            if ( classifier != null )
+            {
+                builder.append( ":" );
+                builder.append( classifier );
+            }
+            if ( type != null )
+            {
+                builder.append( ":" );
+                builder.append( type );
+            }
+            return builder.toString();
+        }
+
     }
 
 }
