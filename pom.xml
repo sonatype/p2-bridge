@@ -83,6 +83,7 @@
             <dependency>
                 <groupId>org.sonatype.p2.bridge</groupId>
                 <artifactId>org.sonatype.p2.bridge.impl</artifactId>
+                <type>pom</type>
                 <version>1.0.8-SNAPSHOT</version>
             </dependency>
             <dependency>

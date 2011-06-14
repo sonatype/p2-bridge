@@ -46,6 +46,12 @@
 
         <dependency>
             <groupId>org.sonatype.p2.bridge</groupId>
+            <artifactId>org.sonatype.p2.bridge.impl</artifactId>
+            <type>pom</type>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.sonatype.p2.bridge</groupId>
             <artifactId>p2-runtime</artifactId>
             <type>zip</type>
             <scope>runtime</scope>
