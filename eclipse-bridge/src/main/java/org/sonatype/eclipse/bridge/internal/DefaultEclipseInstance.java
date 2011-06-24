@@ -43,31 +43,37 @@ class DefaultEclipseInstance
         eclipseLock = new ReentrantLock( true );
     }
 
+    @Override
     public <T> T getService( final Class<T> serviceType )
     {
         return state.getService( serviceType );
     }
 
+    @Override
     public Long installBundle( final String location )
     {
         return state.installBundle( location );
     }
 
+    @Override
     public Long installBundle( final String location, final InputStream inputStream )
     {
         return state.installBundle( location, inputStream );
     }
 
+    @Override
     public void startBundle( final Long id )
     {
         state.startBundle( id );
     }
 
+    @Override
     public EclipseInstance shutdown()
     {
         return state.shutdown();
     }
 
+    @Override
     public EclipseInstance start( final Map<String, String> launchProperties )
     {
         return state.start( launchProperties );
@@ -94,6 +100,7 @@ class DefaultEclipseInstance
             cleanupThread.start();
         }
 
+        @Override
         public <T> T getService( final Class<T> serviceType )
         {
             try
@@ -107,12 +114,14 @@ class DefaultEclipseInstance
                 final ServiceReference serviceReference = bundleContext.getServiceReference( serviceType.getName() );
                 if ( serviceReference == null )
                 {
-                    throw new IllegalStateException( String.format( "There is no service available of type %s", serviceType ) );
+                    throw new IllegalStateException( String.format( "There is no service available of type %s",
+                        serviceType ) );
                 }
                 final T service = serviceType.cast( bundleContext.getService( serviceReference ) );
                 if ( service == null )
                 {
-                    throw new IllegalStateException( String.format( "There is no service available of type %s", serviceType ) );
+                    throw new IllegalStateException( String.format( "There is no service available of type %s",
+                        serviceType ) );
                 }
                 activeServices.put( new WeakReference<T>( service, staleReferences ), serviceReference );
                 return service;
@@ -123,6 +132,7 @@ class DefaultEclipseInstance
             }
         }
 
+        @Override
         public Long installBundle( final String location )
         {
             try
@@ -146,6 +156,7 @@ class DefaultEclipseInstance
             }
         }
 
+        @Override
         public Long installBundle( final String location, final InputStream inputStream )
         {
             try
@@ -169,6 +180,7 @@ class DefaultEclipseInstance
             }
         }
 
+        @Override
         public void startBundle( final Long id )
         {
             try
@@ -192,6 +204,7 @@ class DefaultEclipseInstance
             }
         }
 
+        @Override
         public EclipseInstance shutdown()
         {
             try
@@ -213,6 +226,7 @@ class DefaultEclipseInstance
             }
         }
 
+        @Override
         public EclipseInstance start( final Map<String, String> launchProperties )
         {
             return this;
@@ -222,6 +236,7 @@ class DefaultEclipseInstance
             implements Runnable
         {
 
+            @Override
             public void run()
             {
                 try
@@ -244,34 +259,40 @@ class DefaultEclipseInstance
         implements EclipseInstance
     {
 
+        @Override
         public <T> T getService( final Class<T> serviceType )
         {
             // TODO shall it fail since not started?
             return null;
         }
 
+        @Override
         public Long installBundle( final String location )
         {
             // TODO shall it fail since not started?
             return null;
         }
 
+        @Override
         public Long installBundle( final String location, final InputStream inputStream )
         {
             // TODO shall it fail since not started?
             return null;
         }
 
+        @Override
         public void startBundle( final Long id )
         {
             // TODO shall it fail since not started?
         }
 
+        @Override
         public EclipseInstance shutdown()
         {
             return this;
         }
 
+        @Override
         public EclipseInstance start( final Map<String, String> launchProperties )
         {
             try
@@ -298,7 +319,17 @@ class DefaultEclipseInstance
                 FrameworkProperties.setProperties( (Map) System.getProperties() );
 
                 EclipseStarter.setInitialProperties( properties );
-                EclipseStarter.startup( new String[0], null );
+
+                // must backup the TCL as Equinox will set it to its own loader
+                final ClassLoader tcl = Thread.currentThread().getContextClassLoader();
+                try
+                {
+                    EclipseStarter.startup( new String[0], null );
+                }
+                finally
+                {
+                    Thread.currentThread().setContextClassLoader( tcl );
+                }
 
                 state = new Started();
 

@@ -1,13 +1,10 @@
 package org.sonatype.p2.bridge.internal;
 
 import java.net.URI;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.eclipse.equinox.internal.p2.artifact.repository.CompositeArtifactRepository;
 import org.eclipse.equinox.internal.p2.metadata.repository.CompositeMetadataRepository;
 import org.eclipse.equinox.p2.core.IProvisioningAgent;
-import org.eclipse.equinox.p2.core.IProvisioningAgentProvider;
 import org.eclipse.equinox.p2.core.ProvisionException;
 import org.eclipse.equinox.p2.metadata.IArtifactKey;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
@@ -19,25 +16,21 @@ import org.eclipse.equinox.p2.repository.metadata.IMetadataRepositoryManager;
 import org.sonatype.p2.bridge.CompositeRepository;
 
 public class CompositeRepositoryService
+    extends AbstractService
     implements CompositeRepository
 {
-
-    private IProvisioningAgentProvider provider;
-
-    private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
     public void addArtifactsRepository( final URI location, final URI childLocation )
     {
         try
         {
-            lock.readLock().lock();
-            final ICompositeRepository<IArtifactKey> compositeRepository =
-                loadArtifactsCompositeRepository( location );
+            getLock().readLock().lock();
+            final ICompositeRepository<IArtifactKey> compositeRepository = loadArtifactsCompositeRepository( location );
             compositeRepository.addChild( childLocation );
         }
         finally
         {
-            lock.readLock().unlock();
+            getLock().readLock().unlock();
         }
     }
 
@@ -45,14 +38,13 @@ public class CompositeRepositoryService
     {
         try
         {
-            lock.readLock().lock();
-            final ICompositeRepository<IArtifactKey> compositeRepository =
-                loadArtifactsCompositeRepository( location );
+            getLock().readLock().lock();
+            final ICompositeRepository<IArtifactKey> compositeRepository = loadArtifactsCompositeRepository( location );
             compositeRepository.removeChild( childLocation );
         }
         finally
         {
-            lock.readLock().unlock();
+            getLock().readLock().unlock();
         }
     }
 
@@ -60,14 +52,14 @@ public class CompositeRepositoryService
     {
         try
         {
-            lock.readLock().lock();
+            getLock().readLock().lock();
             final ICompositeRepository<IInstallableUnit> compositeRepository =
                 loadMetadataCompositeRepository( location );
             compositeRepository.addChild( childLocation );
         }
         finally
         {
-            lock.readLock().unlock();
+            getLock().readLock().unlock();
         }
     }
 
@@ -75,45 +67,27 @@ public class CompositeRepositoryService
     {
         try
         {
-            lock.readLock().lock();
+            getLock().readLock().lock();
             final ICompositeRepository<IInstallableUnit> compositeRepository =
                 loadMetadataCompositeRepository( location );
             compositeRepository.removeChild( childLocation );
         }
         finally
         {
-            lock.readLock().unlock();
+            getLock().readLock().unlock();
         }
-    }
-
-    protected void setProvisioningAgentProvider( final IProvisioningAgentProvider provider )
-    {
-        try
-        {
-            lock.writeLock().lock();
-            this.provider = provider;
-        }
-        finally
-        {
-            lock.writeLock().unlock();
-        }
-    }
-
-    protected void unsetProvisioningAgentProvider( final IProvisioningAgentProvider provider )
-    {
-        setProvisioningAgentProvider( null );
     }
 
     private ICompositeRepository<IArtifactKey> loadArtifactsCompositeRepository( final URI location )
     {
         try
         {
-            if ( provider == null )
+            if ( getProvider() == null )
             {
                 throw new RuntimeException(
                     "Cannot load composite repository as there is no provisioning agent provider" );
             }
-            final IProvisioningAgent agent = provider.createAgent( location.resolve( ".p2" ) );
+            final IProvisioningAgent agent = getProvider().createAgent( location.resolve( ".p2" ) );
             final IArtifactRepositoryManager manager =
                 (IArtifactRepositoryManager) agent.getService( IArtifactRepositoryManager.SERVICE_NAME );
             if ( manager == null )
@@ -158,12 +132,12 @@ public class CompositeRepositoryService
     {
         try
         {
-            if ( provider == null )
+            if ( getProvider() == null )
             {
                 throw new RuntimeException(
                     "Cannot load composite repository as there is no provisioning agent provider" );
             }
-            final IProvisioningAgent agent = provider.createAgent( location.resolve( ".p2" ) );
+            final IProvisioningAgent agent = getProvider().createAgent( location.resolve( ".p2" ) );
             final IMetadataRepositoryManager manager =
                 (IMetadataRepositoryManager) agent.getService( IMetadataRepositoryManager.SERVICE_NAME );
             if ( manager == null )

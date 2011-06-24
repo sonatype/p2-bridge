@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Ant-Version: Apache Ant 1.7.1
+Created-By: 14.0-b16 (Sun Microsystems Inc.)
+Bundle-ManifestVersion: 2
+Bundle-Name: %bundleName
+Bundle-SymbolicName: org.sat4j.pb
+Bundle-Version: 2.2.0.v20100429
+Export-Package: org.sat4j.pb;version="2.2.0.v20100429",org.sat4j.pb.co
+ nstraints;version="2.2.0.v20100429",org.sat4j.pb.constraints.pb;versi
+ on="2.2.0.v20100429",org.sat4j.pb.core;version="2.2.0.v20100429",org.
+ sat4j.pb.orders;version="2.2.0.v20100429",org.sat4j.pb.reader;version
+ ="2.2.0.v20100429",org.sat4j.pb.tools;version="2.2.0.v20100429"
+Bundle-Vendor: %providerName
+Bundle-Localization: plugin
+Require-Bundle: org.sat4j.core
+Built-By: Daniel Le Berre
+Main-Class: org.sat4j.pb.LanceurPseudo2007
+Specification-Title: SAT4J
+Specification-Version: NA
+Specification-Vendor: Daniel Le Berre
+Implementation-Title: SAT4J
+Implementation-Version: 2.2.0.v20100429 
+Implementation-Vendor: CRIL CNRS UMR 8188 - Universite d'Artois
+Bundle-RequiredExecutionEnvironment: J2SE-1.4
+Class-Path: org.sat4j.core.jar
+Bundle-ClassPath: jar/org.sat4j.pb_2.2.0.v20100429.jar

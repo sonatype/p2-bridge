@@ -7,6 +7,7 @@
  */
 package org.sonatype.p2.bridge;
 
+import java.io.File;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Map;
@@ -18,11 +19,35 @@ public interface ArtifactRepository
 
     static final String TAGS_PROPERTY = "org.sonatype.sisu.assembler.tags";
 
+    static final String REPOSITORY_PATH_PROPERTY = "repositoryPath";
+
     void write( URI location, final Collection<InstallableArtifact> artifacts, String name,
-                Map<String, String> properties );
+                Map<String, String> properties, final String[][] mappings );
 
     void resolve( URI location, ArtifactResolver artifactResolver );
 
+    Collection<InstallableArtifact> getInstallableArtifacts( URI location );
+
     Map<String, String> getProperties( URI location );
+
+    void createProxyRepository( final URI location, final String username, final String password,
+                                final URI destination, final File artifactMappingsXmlFile );
+
+    /**
+     * Merges all artifacts present in specified location into destination. If artifacts are already present they will
+     * be updated.
+     * 
+     * @param location URI of p2 repository containing artifacts to be merged
+     * @param destination URI of p2 repository into which artifacts should be merged
+     */
+    void merge( URI location, URI destination );
+
+    /**
+     * Removes all artifacts present in specified location from destination.
+     * 
+     * @param location URI of p2 repository containing artifacts to be removed
+     * @param destination URI of p2 repository from where artifacts should be removed
+     */
+    void remove( URI location, URI destination );
 
 }

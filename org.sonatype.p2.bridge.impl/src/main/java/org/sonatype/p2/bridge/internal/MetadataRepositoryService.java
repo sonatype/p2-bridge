@@ -18,12 +18,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.equinox.internal.p2.metadata.ArtifactKey;
 import org.eclipse.equinox.p2.core.IProvisioningAgent;
-import org.eclipse.equinox.p2.core.IProvisioningAgentProvider;
 import org.eclipse.equinox.p2.core.ProvisionException;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 import org.eclipse.equinox.p2.metadata.IProvidedCapability;
@@ -46,6 +44,7 @@ import org.eclipse.equinox.p2.metadata.expression.IMatchExpression;
 import org.eclipse.equinox.p2.query.IQuery;
 import org.eclipse.equinox.p2.query.IQueryResult;
 import org.eclipse.equinox.p2.query.QueryUtil;
+import org.eclipse.equinox.p2.repository.IRepository;
 import org.eclipse.equinox.p2.repository.metadata.IMetadataRepository;
 import org.eclipse.equinox.p2.repository.metadata.IMetadataRepositoryManager;
 import org.sonatype.p2.bridge.IUIdentity;
@@ -63,41 +62,23 @@ import org.sonatype.p2.bridge.model.TouchpointType;
 import org.sonatype.p2.bridge.model.UpdateDescriptor;
 
 public class MetadataRepositoryService
+    extends AbstractService
     implements MetadataRepository
 {
-
-    private final ReadWriteLock lock = new ReentrantReadWriteLock();
-
-    private IProvisioningAgentProvider provider;
 
     public void write( final URI location, final Collection<InstallableUnit> units, final String name,
                        final Map<String, String> properties )
     {
         try
         {
-            lock.readLock().lock();
+            getLock().readLock().lock();
 
-            final IMetadataRepositoryManager manager = getManager( location.resolve( ".p2" ) );
-            IMetadataRepository repository = null;
-            try
-            {
-                repository = manager.loadRepository( location, null );
-                repository.removeAll();
-                repository.getProperties().clear();
-                if ( properties != null )
-                {
-                    repository.getProperties().putAll( properties );
-                }
-            }
-            catch ( final Exception ignore )
-            {
-                // repository does not exist. create it
-                repository =
-                    manager.createRepository( location, name, IMetadataRepositoryManager.TYPE_SIMPLE_REPOSITORY,
-                        properties );
-            }
+            final IMetadataRepositoryManager manager = getManager( null );
+
+            final IMetadataRepository repository = getOrCreateRepository( location, name, properties, manager );
 
             addIUs( repository, units );
+
             if ( repository == null )
             {
                 throw new RuntimeException( "Cannot write metadata repository as repository coud not be created" );
@@ -109,15 +90,40 @@ public class MetadataRepositoryService
         }
         finally
         {
-            lock.readLock().unlock();
+            getLock().readLock().unlock();
         }
+    }
+
+    private IMetadataRepository getOrCreateRepository( final URI location, final String name,
+                                                       final Map<String, String> properties,
+                                                       final IMetadataRepositoryManager manager )
+        throws ProvisionException
+    {
+        IMetadataRepository repository = null;
+        try
+        {
+            repository = manager.loadRepository( location, null );
+            repository.removeAll();
+            repository.getProperties().clear();
+            if ( properties != null )
+            {
+                repository.getProperties().putAll( properties );
+            }
+        }
+        catch ( final Exception ignore )
+        {
+            // repository does not exist. create it
+            repository =
+                manager.createRepository( location, name, IMetadataRepositoryManager.TYPE_SIMPLE_REPOSITORY, properties );
+        }
+        return repository;
     }
 
     public Collection<IUIdentity> getGroupIUs( final URI... metadataRepositories )
     {
         try
         {
-            lock.readLock().lock();
+            getLock().readLock().lock();
 
             final Collection<IMetadataRepository> repositories = getRepositories( metadataRepositories );
 
@@ -138,7 +144,7 @@ public class MetadataRepositoryService
         }
         finally
         {
-            lock.readLock().unlock();
+            getLock().readLock().unlock();
         }
     }
 
@@ -147,7 +153,7 @@ public class MetadataRepositoryService
     {
         try
         {
-            lock.readLock().lock();
+            getLock().readLock().lock();
 
             final Collection<IMetadataRepository> repositories = getRepositories( metadataRepositories );
             final Collection<IUIdentity> found = new HashSet<IUIdentity>();
@@ -180,15 +186,21 @@ public class MetadataRepositoryService
         }
         finally
         {
-            lock.readLock().unlock();
+            getLock().readLock().unlock();
         }
+    }
+
+    public Collection<InstallableUnit> getInstallableUnits( final URI location )
+    {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     public Map<String, String> getProperties( final URI location )
     {
         try
         {
-            lock.readLock().lock();
+            getLock().readLock().lock();
 
             final IMetadataRepository repository = getRepositories( location ).iterator().next();
 
@@ -200,8 +212,145 @@ public class MetadataRepositoryService
         }
         finally
         {
-            lock.readLock().unlock();
+            getLock().readLock().unlock();
         }
+    }
+
+    public void createProxyRepository( final URI location, final String username, final String password,
+                                       final URI destination )
+    {
+        final P2AuthSession p2AuthSession = new P2AuthSession();
+        try
+        {
+            p2AuthSession.setCredentials( location, username, password );
+
+            final IMetadataRepositoryManager manager = getManager( null );
+            final boolean isNewRepository = !manager.contains( location );
+            final NullProgressMonitor monitor = new NullProgressMonitor();
+            try
+            {
+                // if ( !isNewRepository )
+                // {
+                // HACK Start - This is an ugly hack: we refresh the repository
+                // even if it is not known to the
+                // artifactRepositoryManager only to get it removed from
+                // internal p2 caches (like not found repos cache)
+                manager.refreshRepository( location, monitor );
+                // HACK End
+                // }
+            }
+            catch ( final Exception e )
+            {
+                // We get an exception here if the repo is not known to the
+                // artifactRepositoryManager
+                // Ignore it
+            }
+            try
+            {
+                final IMetadataRepository remoteRepository = manager.loadRepository( location, monitor );
+
+                final IQueryResult<IInstallableUnit> unitsQuery = remoteRepository.query( QueryUtil.ALL_UNITS, monitor );
+
+                if ( manager.contains( destination ) )
+                {
+                    manager.removeRepository( destination );
+                }
+
+                // ensure that even if the remote repository is compressed the local one is not
+                final Map<String, String> properties = new HashMap<String, String>( remoteRepository.getProperties() );
+                properties.put( IRepository.PROP_COMPRESSED, "false" );
+
+                final IMetadataRepository localRepository =
+                    getOrCreateRepository( destination, remoteRepository.getName(), properties, manager );
+
+                localRepository.addInstallableUnits( unitsQuery.toSet() );
+            }
+            finally
+            {
+                if ( isNewRepository )
+                {
+                    manager.removeRepository( location );
+                }
+            }
+        }
+        catch ( final ProvisionException e )
+        {
+            throw new RuntimeException( "Cannot write metadata repository. Reason: " + e.getMessage(), e );
+        }
+        finally
+        {
+            p2AuthSession.cleanup();
+        }
+    }
+
+    public void merge( final URI location, final URI destination )
+    {
+        try
+        {
+            getLock().readLock().lock();
+
+            final NullProgressMonitor monitor = new NullProgressMonitor();
+
+            final IMetadataRepository sourceRepository = getRepository( location );
+            final IQueryResult<IInstallableUnit> unitsQuery = sourceRepository.query( QueryUtil.ALL_UNITS, monitor );
+            if ( unitsQuery.isEmpty() )
+            {
+                return;
+            }
+            final IMetadataRepository destinationRepository = getRepository( destination );
+
+            destinationRepository.addInstallableUnits( unitsQuery.toSet() );
+        }
+        catch ( final ProvisionException e )
+        {
+            throw new RuntimeException( String.format( "Cannot merge metadata repository [%s] into [%s] due to [%s]",
+                location, destination, e.getMessage() ), e );
+        }
+        finally
+        {
+            getLock().readLock().unlock();
+        }
+    }
+
+    public void remove( final URI location, final URI destination )
+    {
+        try
+        {
+            getLock().readLock().lock();
+
+            final NullProgressMonitor monitor = new NullProgressMonitor();
+
+            final IMetadataRepository sourceRepository = getRepository( location );
+            final IQueryResult<IInstallableUnit> unitsQuery = sourceRepository.query( QueryUtil.ALL_UNITS, monitor );
+            if ( unitsQuery.isEmpty() )
+            {
+                return;
+            }
+            final IMetadataRepository destinationRepository = getRepository( destination );
+
+            destinationRepository.removeInstallableUnits( unitsQuery.toSet() );
+        }
+        catch ( final ProvisionException e )
+        {
+            throw new RuntimeException( String.format( "Cannot remove metadata repository [%s] from [%s] due to [%s]",
+                location, destination, e.getMessage() ), e );
+        }
+        finally
+        {
+            getLock().readLock().unlock();
+        }
+    }
+
+    private IMetadataRepository getRepository( final URI location )
+        throws ProvisionException
+    {
+        final IMetadataRepositoryManager manager = getManager( null );
+        final IMetadataRepository repository = manager.loadRepository( location, null );
+        if ( repository == null )
+        {
+            throw new RuntimeException( "Cannot load metadata repository as repository could not be created" );
+        }
+        return repository;
     }
 
     private Collection<IMetadataRepository> getRepositories( final URI... locations )
@@ -224,10 +373,9 @@ public class MetadataRepositoryService
     private IMetadataRepositoryManager getManager( final URI location )
         throws ProvisionException
     {
-        if ( provider == null )
+        if ( getProvider() == null )
         {
-            throw new RuntimeException(
-                "Cannot load metadata repository as there is no provisioning agent provider" );
+            throw new RuntimeException( "Cannot load metadata repository as there is no provisioning agent provider" );
         }
         URI p2AgentLocation = location;
         if ( p2AgentLocation == null )
@@ -237,7 +385,7 @@ public class MetadataRepositoryService
             agentDir.deleteOnExit();
             p2AgentLocation = agentDir.toURI();
         }
-        final IProvisioningAgent agent = provider.createAgent( p2AgentLocation );
+        final IProvisioningAgent agent = getProvider().createAgent( p2AgentLocation.resolve( ".p2" ) );
         final IMetadataRepositoryManager manager =
             (IMetadataRepositoryManager) agent.getService( IMetadataRepositoryManager.SERVICE_NAME );
         if ( manager == null )
@@ -543,24 +691,6 @@ public class MetadataRepositoryService
                 null );
 
         description.setUpdateDescriptor( updateDescriptor );
-    }
-
-    protected void setProvisioningAgentProvider( final IProvisioningAgentProvider provider )
-    {
-        try
-        {
-            lock.writeLock().lock();
-            this.provider = provider;
-        }
-        finally
-        {
-            lock.writeLock().unlock();
-        }
-    }
-
-    protected void unsetProvisioningAgentProvider( final IProvisioningAgentProvider provider )
-    {
-        setProvisioningAgentProvider( null );
     }
 
 }
