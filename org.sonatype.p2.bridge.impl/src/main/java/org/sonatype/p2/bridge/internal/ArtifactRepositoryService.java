@@ -328,7 +328,8 @@ public class ArtifactRepositoryService
                 final Collection<SimpleArtifactRepository> memberRepositories =
                     getMemberRepositories( manager, remoteRepository, monitor, "" /* indent */);
 
-                final Map<String, String> repositoryProperties = calculateRepositoryProperties( memberRepositories );
+                final Map<String, String> repositoryProperties =
+                    new LinkedHashMap<String, String>( calculateRepositoryProperties( memberRepositories ) );
 
                 final IQueryResult<IArtifactDescriptor> descriptorsQuery =
                     remoteRepository.descriptorQueryable().query( ArtifactDescriptorQuery.ALL_DESCRIPTORS,
@@ -340,8 +341,7 @@ public class ArtifactRepositoryService
                 }
 
                 // ensure that even if the remote repository is compressed the local one is not
-                final Map<String, String> properties = new HashMap<String, String>( remoteRepository.getProperties() );
-                properties.put( IRepository.PROP_COMPRESSED, "false" );
+                repositoryProperties.put( IRepository.PROP_COMPRESSED, "false" );
 
                 final SimpleArtifactRepository localRepository =
                     getOrCreateRepository( destination, remoteRepository.getName(), repositoryProperties, manager );
