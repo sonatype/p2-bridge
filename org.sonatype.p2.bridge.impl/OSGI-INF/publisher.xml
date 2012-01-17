@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (c) 2007-2010 Sonatype, Inc.
+  All rights reserved. This program and the accompanying materials
+  are made available under the terms of the Eclipse Public License v1.0
+  which accompanies this distribution, and is available at
+  http://www.eclipse.org/legal/epl-v10.html
+-->
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.sonatype.p2.bridge.internal.PublisherService">
+   <implementation class="org.sonatype.p2.bridge.internal.PublisherService"/>
+   <reference bind="setProvisioningAgentProvider" cardinality="1..1" interface="org.eclipse.equinox.p2.core.IProvisioningAgentProvider" name="IProvisioningAgentProvider" policy="static" unbind="unsetProvisioningAgentProvider"/>
+   <service>
+      <provide interface="org.sonatype.p2.bridge.Publisher"/>
+   </service>
+</scr:component>

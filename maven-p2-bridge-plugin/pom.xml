@@ -13,7 +13,7 @@
     <parent>
         <groupId>org.sonatype.p2.bridge</groupId>
         <artifactId>p2-bridge-aggregator</artifactId>
-        <version>1.0.7</version>
+        <version>1.0.8</version>
     </parent>
 
     <groupId>org.sonatype.maven.plugins</groupId>
@@ -44,6 +44,12 @@
             <artifactId>org.sonatype.p2.bridge.api</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.sonatype.p2.bridge</groupId>
+            <artifactId>org.sonatype.p2.bridge.impl</artifactId>
+            <type>pom</type>
+            <scope>runtime</scope>
+        </dependency>
         <dependency>
             <groupId>org.sonatype.p2.bridge</groupId>
             <artifactId>p2-runtime</artifactId>

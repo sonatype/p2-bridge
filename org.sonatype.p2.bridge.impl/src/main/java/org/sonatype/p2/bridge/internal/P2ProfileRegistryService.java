@@ -12,6 +12,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -74,11 +75,13 @@ public class P2ProfileRegistryService
 
             final long[] timestamps = profileRegistry.listProfileTimestamps( profileId );
 
+            final Map<String, String> tagsPerTimestamp =
+                profileRegistry.getProfileStateProperties( profileId, IProfile.STATE_PROP_TAG );
             final List<ProfileTimestamp> profileTimestamps = new ArrayList<ProfileTimestamp>();
             for ( final long timestamp : timestamps )
             {
                 final IProfile profile = profileRegistry.getProfile( profileId, timestamp );
-                final String tag = profile == null ? null : profile.getProperty( IProfile.PROP_TAG );
+                final String tag = tagsPerTimestamp.get( String.valueOf( timestamp ) );
 
                 final IQueryResult<IInstallableUnit> roots = profile.query( new UserVisibleRootQuery(), null );
                 final Set<IInstallableUnit> sorted = new TreeSet<IInstallableUnit>( roots.toUnmodifiableSet() );
