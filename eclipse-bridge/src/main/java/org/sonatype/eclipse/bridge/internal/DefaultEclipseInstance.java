@@ -96,7 +96,7 @@ class DefaultEclipseInstance
             activeServices = new HashMap<WeakReference<?>, ServiceReference>();
             staleReferences = new ReferenceQueue<Object>();
             lock = new ReentrantReadWriteLock();
-            cleanupThread = new Thread( new Cleanup() );
+            cleanupThread = new Thread( new Cleanup(), "Stale Eclipse services cleanup" );
             cleanupThread.start();
         }
 
