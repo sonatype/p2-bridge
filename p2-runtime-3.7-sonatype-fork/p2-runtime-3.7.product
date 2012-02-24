@@ -74,6 +74,7 @@
    </plugins>
 
    <configurations>
+      <plugin id="org.eclipse.core.net" autoStart="true" startLevel="0" />
       <plugin id="org.eclipse.equinox.ds" autoStart="true" startLevel="2" />
       <plugin id="org.eclipse.equinox.simpleconfigurator" autoStart="true" startLevel="1" />
    </configurations>

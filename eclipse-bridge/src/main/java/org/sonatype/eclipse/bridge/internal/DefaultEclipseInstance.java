@@ -340,7 +340,6 @@ class DefaultEclipseInstance
                 throw new RuntimeException( e );
             }
         }
-
     }
 
 }
