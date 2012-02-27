@@ -62,14 +62,14 @@ public class HttpProxyService
         {
             if ( nonProxyHosts != null && nonProxyHosts.size() > 0 )
             {
-                proxyService.setNonProxiedHosts( nonProxyHosts.toArray( new String[0] ) );
+                proxyService.setNonProxiedHosts( nonProxyHosts.toArray( new String[nonProxyHosts.size()] ) );
             }
             else
             {
                 proxyService.setNonProxiedHosts( new String[0] );
             }
 
-            proxyService.setProxyData( new IProxyData[] { httpProxyData, httpsProxyData, } );
+            proxyService.setProxyData( new IProxyData[] { httpProxyData, httpsProxyData } );
 
             proxyService.setProxiesEnabled( true );
             proxyService.setSystemProxiesEnabled( false );
