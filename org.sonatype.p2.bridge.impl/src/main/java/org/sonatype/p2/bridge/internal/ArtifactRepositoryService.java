@@ -19,7 +19,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -68,11 +67,12 @@ public class ArtifactRepositoryService
     public void write( final URI location, final Collection<InstallableArtifact> artifacts, final String name,
                        final Map<String, String> properties, final String[][] mappings )
     {
+        IArtifactRepositoryManager manager = null;
         try
         {
             getLock().readLock().lock();
 
-            final IArtifactRepositoryManager manager = getManager( null );
+            manager = getManager( null );
             final IArtifactRepository repository = getOrCreateRepository( location, name, properties, manager );
             if ( mappings != null )
             {
@@ -86,6 +86,10 @@ public class ArtifactRepositoryService
         }
         finally
         {
+            if ( manager != null )
+            {
+                manager.getAgent().stop();
+            }
             getLock().readLock().unlock();
         }
     }
@@ -127,11 +131,13 @@ public class ArtifactRepositoryService
 
     public void resolve( final URI location, final ArtifactResolver artifactResolver )
     {
+        IArtifactRepositoryManager manager = null;
         try
         {
             getLock().readLock().lock();
 
-            final IArtifactRepository repository = getRepository( location );
+            manager = getManager( null );
+            final IArtifactRepository repository = getRepository( manager, location );
             if ( !( repository instanceof SimpleArtifactRepository ) )
             {
                 throw new RuntimeException(
@@ -216,19 +222,25 @@ public class ArtifactRepositoryService
         }
         finally
         {
+            if ( manager != null )
+            {
+                manager.getAgent().stop();
+            }
             getLock().readLock().unlock();
         }
     }
 
     public Collection<InstallableArtifact> getInstallableArtifacts( final URI location )
     {
+        IArtifactRepositoryManager manager = null;
         try
         {
             getLock().readLock().lock();
 
             final NullProgressMonitor monitor = new NullProgressMonitor();
 
-            final IArtifactRepository repository = getRepository( location );
+            manager = getManager( null );
+            final IArtifactRepository repository = getRepository( manager, location );
             final IQueryResult<IArtifactDescriptor> descriptorsQuery =
                 repository.descriptorQueryable().query( ArtifactDescriptorQuery.ALL_DESCRIPTORS, monitor );
             if ( descriptorsQuery.isEmpty() )
@@ -266,17 +278,23 @@ public class ArtifactRepositoryService
         }
         finally
         {
+            if ( manager != null )
+            {
+                manager.getAgent().stop();
+            }
             getLock().readLock().unlock();
         }
     }
 
     public Map<String, String> getProperties( final URI location )
     {
+        IArtifactRepositoryManager manager = null;
         try
         {
             getLock().readLock().lock();
 
-            final IArtifactRepository repository = getRepository( location );
+            manager = getManager( null );
+            final IArtifactRepository repository = getRepository( manager, location );
 
             return Collections.unmodifiableMap( repository.getProperties() );
         }
@@ -286,6 +304,10 @@ public class ArtifactRepositoryService
         }
         finally
         {
+            if ( manager != null )
+            {
+                manager.getAgent().stop();
+            }
             getLock().readLock().unlock();
         }
     }
@@ -294,13 +316,14 @@ public class ArtifactRepositoryService
                                        final URI destination, final File artifactMappingsXmlFile )
     {
         final P2AuthSession p2AuthSession = new P2AuthSession();
+        IArtifactRepositoryManager manager = null;
         try
         {
             getLock().readLock().lock();
 
             p2AuthSession.setCredentials( location, username, password );
 
-            final IArtifactRepositoryManager manager = getManager( null );
+            manager = getManager( null );
             final boolean isNewRepository = !manager.contains( location );
             final IProgressMonitor monitor = new NullProgressMonitor();
             try
@@ -369,6 +392,10 @@ public class ArtifactRepositoryService
         }
         finally
         {
+            if ( manager != null )
+            {
+                manager.getAgent().stop();
+            }
             getLock().readLock().unlock();
 
             p2AuthSession.cleanup();
@@ -377,20 +404,26 @@ public class ArtifactRepositoryService
 
     public void merge( final URI location, final URI destination )
     {
+        IArtifactRepositoryManager locationManager = null;
+        IArtifactRepositoryManager destinationManager = null;
         try
         {
             getLock().readLock().lock();
 
             final NullProgressMonitor monitor = new NullProgressMonitor();
 
-            final IArtifactRepository sourceRepository = getRepository( location );
+            locationManager = getManager( null );
+            final IArtifactRepository sourceRepository = getRepository( locationManager, location );
+
             final IQueryResult<IArtifactDescriptor> descriptorsQuery =
                 sourceRepository.descriptorQueryable().query( ArtifactDescriptorQuery.ALL_DESCRIPTORS, monitor );
             if ( descriptorsQuery.isEmpty() )
             {
                 return;
             }
-            final IArtifactRepository destinationRepository = getRepository( destination );
+
+            destinationManager = getManager( null );
+            final IArtifactRepository destinationRepository = getRepository( destinationManager, destination );
 
             destinationRepository.addDescriptors( descriptorsQuery.toArray( IArtifactDescriptor.class ), monitor );
         }
@@ -401,26 +434,39 @@ public class ArtifactRepositoryService
         }
         finally
         {
+            if ( locationManager != null )
+            {
+                locationManager.getAgent().stop();
+            }
+            if ( destinationManager != null )
+            {
+                destinationManager.getAgent().stop();
+            }
             getLock().readLock().unlock();
         }
     }
 
     public void remove( final URI location, final URI destination )
     {
+        IArtifactRepositoryManager locationManager = null;
+        IArtifactRepositoryManager destinationManager = null;
         try
         {
             getLock().readLock().lock();
 
             final NullProgressMonitor monitor = new NullProgressMonitor();
 
-            final IArtifactRepository sourceRepository = getRepository( location );
+            locationManager = getManager( null );
+            final IArtifactRepository sourceRepository = getRepository( locationManager, location );
             final IQueryResult<IArtifactDescriptor> descriptorsQuery =
                 sourceRepository.descriptorQueryable().query( ArtifactDescriptorQuery.ALL_DESCRIPTORS, monitor );
             if ( descriptorsQuery.isEmpty() )
             {
                 return;
             }
-            final IArtifactRepository destinationRepository = getRepository( destination );
+
+            destinationManager = getManager( null );
+            final IArtifactRepository destinationRepository = getRepository( destinationManager, destination );
 
             destinationRepository.removeDescriptors( descriptorsQuery.toArray( IArtifactDescriptor.class ), monitor );
         }
@@ -431,6 +477,14 @@ public class ArtifactRepositoryService
         }
         finally
         {
+            if ( locationManager != null )
+            {
+                locationManager.getAgent().stop();
+            }
+            if ( destinationManager != null )
+            {
+                destinationManager.getAgent().stop();
+            }
             getLock().readLock().unlock();
         }
     }
@@ -650,10 +704,9 @@ public class ArtifactRepositoryService
         }
     }
 
-    private IArtifactRepository getRepository( final URI location )
+    private IArtifactRepository getRepository( final IArtifactRepositoryManager manager, final URI location )
         throws ProvisionException
     {
-        final IArtifactRepositoryManager manager = getManager( null );
         final IArtifactRepository repository = manager.loadRepository( location, null );
         if ( repository == null )
         {

@@ -40,11 +40,12 @@ public class P2ProfileRegistryService
 
     public String[] getProfileIds( final File location )
     {
+        final IProvisioningAgent agent = null;
         try
         {
             lock.readLock().lock();
 
-            final IProfileRegistry profileRegistry = getProfileRegistry( location );
+            final IProfileRegistry profileRegistry = getProfileRegistry( agent, location );
 
             final Collection<String> profilesIds = new ArrayList<String>();
 
@@ -61,17 +62,22 @@ public class P2ProfileRegistryService
         }
         finally
         {
+            if ( agent != null )
+            {
+                agent.stop();
+            }
             lock.readLock().unlock();
         }
     }
 
     public ProfileTimestamp[] getProfileTimestamps( final File location, final String profileId )
     {
+        final IProvisioningAgent agent = null;
         try
         {
             lock.readLock().lock();
 
-            final IProfileRegistry profileRegistry = getProfileRegistry( location );
+            final IProfileRegistry profileRegistry = getProfileRegistry( agent, location );
 
             final long[] timestamps = profileRegistry.listProfileTimestamps( profileId );
 
@@ -102,17 +108,22 @@ public class P2ProfileRegistryService
         }
         finally
         {
+            if ( agent != null )
+            {
+                agent.stop();
+            }
             lock.readLock().unlock();
         }
     }
 
     public IUIdentity[] getInstalledRoots( final File location, final String profileId )
     {
+        final IProvisioningAgent agent = null;
         try
         {
             lock.readLock().lock();
 
-            final IProfileRegistry profileRegistry = getProfileRegistry( location );
+            final IProfileRegistry profileRegistry = getProfileRegistry( agent, location );
 
             final IProfile profile = profileRegistry.getProfile( profileId );
             if ( profile == null )
@@ -137,17 +148,22 @@ public class P2ProfileRegistryService
         }
         finally
         {
+            if ( agent != null )
+            {
+                agent.stop();
+            }
             lock.readLock().unlock();
         }
     }
 
     public void removeProfile( final File location, final String profile, final long timestamp )
     {
+        final IProvisioningAgent agent = null;
         try
         {
             lock.readLock().lock();
 
-            final IProfileRegistry profileRegistry = getProfileRegistry( location );
+            final IProfileRegistry profileRegistry = getProfileRegistry( agent, location );
 
             profileRegistry.removeProfile( profile, timestamp );
         }
@@ -157,24 +173,34 @@ public class P2ProfileRegistryService
         }
         finally
         {
+            if ( agent != null )
+            {
+                agent.stop();
+            }
             lock.readLock().unlock();
         }
     }
 
-    private IProfileRegistry getProfileRegistry( final File location )
+    private IProfileRegistry getProfileRegistry( final IProvisioningAgent agent, final File location )
         throws ProvisionException, URISyntaxException
     {
-        if ( provider == null )
-        {
-            throw new RuntimeException( "Cannot load profile registry as there is no provisioning agent provider" );
-        }
-        final IProvisioningAgent agent = provider.createAgent( new File( location, "p2" ).getAbsoluteFile().toURI() );
         final IProfileRegistry profileRegistry = (IProfileRegistry) agent.getService( IProfileRegistry.SERVICE_NAME );
         if ( profileRegistry == null )
         {
             throw new RuntimeException( "Could not get hold of P2 profile registry" );
         }
         return profileRegistry;
+    }
+
+    private IProvisioningAgent getAgent( final File location )
+        throws ProvisionException
+    {
+        if ( provider == null )
+        {
+            throw new RuntimeException( "Cannot load profile registry as there is no provisioning agent provider" );
+        }
+        final IProvisioningAgent agent = provider.createAgent( new File( location, "p2" ).getAbsoluteFile().toURI() );
+        return agent;
     }
 
     protected void setProvisioningAgentProvider( final IProvisioningAgentProvider provider )

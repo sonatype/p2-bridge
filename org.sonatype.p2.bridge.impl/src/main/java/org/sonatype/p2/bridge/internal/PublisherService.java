@@ -44,11 +44,12 @@ public class PublisherService
 
     public void generateUpdateSite( final File location, final URI repositoryLocation )
     {
+        IProvisioningAgent agent = null;
         try
         {
             getLock().readLock().lock();
 
-            final IProvisioningAgent agent = createProvisioningAgent();
+            agent = createProvisioningAgent();
 
             final PublisherInfo info = new PublisherInfo();
             info.setArtifactRepository( org.eclipse.equinox.p2.publisher.Publisher.createArtifactRepository( agent,
@@ -66,6 +67,10 @@ public class PublisherService
         }
         finally
         {
+            if ( agent != null )
+            {
+                agent.stop();
+            }
             getLock().readLock().unlock();
         }
     }
