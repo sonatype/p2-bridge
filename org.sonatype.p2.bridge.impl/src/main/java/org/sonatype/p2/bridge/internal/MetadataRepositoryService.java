@@ -69,11 +69,12 @@ public class MetadataRepositoryService
     public void write( final URI location, final Collection<InstallableUnit> units, final String name,
                        final Map<String, String> properties )
     {
+        IMetadataRepositoryManager manager = null;
         try
         {
             getLock().readLock().lock();
 
-            final IMetadataRepositoryManager manager = getManager( null );
+            manager = getManager( null );
 
             final IMetadataRepository repository = getOrCreateRepository( location, name, properties, manager );
 
@@ -90,6 +91,10 @@ public class MetadataRepositoryService
         }
         finally
         {
+            if ( manager != null )
+            {
+                manager.getAgent().stop();
+            }
             getLock().readLock().unlock();
         }
     }
@@ -121,11 +126,13 @@ public class MetadataRepositoryService
 
     public Collection<IUIdentity> getGroupIUs( final URI... metadataRepositories )
     {
+        IMetadataRepositoryManager manager = null;
         try
         {
             getLock().readLock().lock();
 
-            final Collection<IMetadataRepository> repositories = getRepositories( metadataRepositories );
+            manager = getManager( null );
+            final Collection<IMetadataRepository> repositories = getRepositories( manager, metadataRepositories );
 
             final IQueryResult<IInstallableUnit> results =
                 QueryUtil.compoundQueryable( repositories ).query( QueryUtil.createIUGroupQuery(), null );
@@ -144,6 +151,10 @@ public class MetadataRepositoryService
         }
         finally
         {
+            if ( manager != null )
+            {
+                manager.getAgent().stop();
+            }
             getLock().readLock().unlock();
         }
     }
@@ -151,11 +162,13 @@ public class MetadataRepositoryService
     public Collection<IUIdentity> getVersions( final Collection<String> ius, final boolean onlyUpdates,
                                                final URI... metadataRepositories )
     {
+        IMetadataRepositoryManager manager = null;
         try
         {
             getLock().readLock().lock();
 
-            final Collection<IMetadataRepository> repositories = getRepositories( metadataRepositories );
+            manager = getManager( null );
+            final Collection<IMetadataRepository> repositories = getRepositories( manager, metadataRepositories );
             final Collection<IUIdentity> found = new HashSet<IUIdentity>();
 
             for ( final String spec : ius )
@@ -186,6 +199,10 @@ public class MetadataRepositoryService
         }
         finally
         {
+            if ( manager != null )
+            {
+                manager.getAgent().stop();
+            }
             getLock().readLock().unlock();
         }
     }
@@ -198,11 +215,13 @@ public class MetadataRepositoryService
 
     public Map<String, String> getProperties( final URI location )
     {
+        IMetadataRepositoryManager manager = null;
         try
         {
             getLock().readLock().lock();
 
-            final IMetadataRepository repository = getRepositories( location ).iterator().next();
+            manager = getManager( null );
+            final IMetadataRepository repository = getRepositories( manager, location ).iterator().next();
 
             return Collections.unmodifiableMap( repository.getProperties() );
         }
@@ -212,6 +231,10 @@ public class MetadataRepositoryService
         }
         finally
         {
+            if ( manager != null )
+            {
+                manager.getAgent().stop();
+            }
             getLock().readLock().unlock();
         }
     }
@@ -220,11 +243,12 @@ public class MetadataRepositoryService
                                        final URI destination )
     {
         final P2AuthSession p2AuthSession = new P2AuthSession();
+        IMetadataRepositoryManager manager = null;
         try
         {
             p2AuthSession.setCredentials( location, username, password );
 
-            final IMetadataRepositoryManager manager = getManager( null );
+            manager = getManager( null );
             final boolean isNewRepository = !manager.contains( location );
             final NullProgressMonitor monitor = new NullProgressMonitor();
             try
@@ -279,25 +303,35 @@ public class MetadataRepositoryService
         }
         finally
         {
+            if ( manager != null )
+            {
+                manager.getAgent().stop();
+            }
             p2AuthSession.cleanup();
         }
     }
 
     public void merge( final URI location, final URI destination )
     {
+        IMetadataRepositoryManager locationManager = null;
+        IMetadataRepositoryManager destinationManager = null;
         try
         {
             getLock().readLock().lock();
 
             final NullProgressMonitor monitor = new NullProgressMonitor();
 
-            final IMetadataRepository sourceRepository = getRepository( location );
+            locationManager = getManager( null );
+            final IMetadataRepository sourceRepository = getRepository( locationManager, location );
+
             final IQueryResult<IInstallableUnit> unitsQuery = sourceRepository.query( QueryUtil.ALL_UNITS, monitor );
             if ( unitsQuery.isEmpty() )
             {
                 return;
             }
-            final IMetadataRepository destinationRepository = getRepository( destination );
+
+            destinationManager = getManager( null );
+            final IMetadataRepository destinationRepository = getRepository( destinationManager, destination );
 
             destinationRepository.addInstallableUnits( unitsQuery.toSet() );
         }
@@ -308,25 +342,39 @@ public class MetadataRepositoryService
         }
         finally
         {
+            if ( locationManager != null )
+            {
+                locationManager.getAgent().stop();
+            }
+            if ( destinationManager != null )
+            {
+                destinationManager.getAgent().stop();
+            }
             getLock().readLock().unlock();
         }
     }
 
     public void remove( final URI location, final URI destination )
     {
+        IMetadataRepositoryManager locationManager = null;
+        IMetadataRepositoryManager destinationManager = null;
         try
         {
             getLock().readLock().lock();
 
             final NullProgressMonitor monitor = new NullProgressMonitor();
 
-            final IMetadataRepository sourceRepository = getRepository( location );
+            locationManager = getManager( null );
+            final IMetadataRepository sourceRepository = getRepository( locationManager, location );
+
             final IQueryResult<IInstallableUnit> unitsQuery = sourceRepository.query( QueryUtil.ALL_UNITS, monitor );
             if ( unitsQuery.isEmpty() )
             {
                 return;
             }
-            final IMetadataRepository destinationRepository = getRepository( destination );
+
+            destinationManager = getManager( null );
+            final IMetadataRepository destinationRepository = getRepository( destinationManager, destination );
 
             destinationRepository.removeInstallableUnits( unitsQuery.toSet() );
         }
@@ -337,14 +385,21 @@ public class MetadataRepositoryService
         }
         finally
         {
+            if ( locationManager != null )
+            {
+                locationManager.getAgent().stop();
+            }
+            if ( destinationManager != null )
+            {
+                destinationManager.getAgent().stop();
+            }
             getLock().readLock().unlock();
         }
     }
 
-    private IMetadataRepository getRepository( final URI location )
+    private IMetadataRepository getRepository( final IMetadataRepositoryManager manager, final URI location )
         throws ProvisionException
     {
-        final IMetadataRepositoryManager manager = getManager( null );
         final IMetadataRepository repository = manager.loadRepository( location, null );
         if ( repository == null )
         {
@@ -353,10 +408,10 @@ public class MetadataRepositoryService
         return repository;
     }
 
-    private Collection<IMetadataRepository> getRepositories( final URI... locations )
+    private Collection<IMetadataRepository> getRepositories( final IMetadataRepositoryManager manager,
+                                                             final URI... locations )
         throws ProvisionException
     {
-        final IMetadataRepositoryManager manager = getManager( null );
         final Collection<IMetadataRepository> repos = new ArrayList<IMetadataRepository>();
         for ( final URI location : locations )
         {

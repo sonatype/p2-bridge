@@ -22,79 +22,89 @@ public class CompositeRepositoryService
 
     public void addArtifactsRepository( final URI location, final URI childLocation )
     {
+        final IArtifactRepositoryManager manager = null;
         try
         {
             getLock().readLock().lock();
-            final ICompositeRepository<IArtifactKey> compositeRepository = loadArtifactsCompositeRepository( location );
+            final ICompositeRepository<IArtifactKey> compositeRepository =
+                loadArtifactsCompositeRepository( manager, location );
             compositeRepository.addChild( childLocation );
         }
         finally
         {
+            if ( manager != null )
+            {
+                manager.getAgent().stop();
+            }
             getLock().readLock().unlock();
         }
     }
 
     public void removeArtifactsRepository( final URI location, final URI childLocation )
     {
+        final IArtifactRepositoryManager manager = null;
         try
         {
             getLock().readLock().lock();
-            final ICompositeRepository<IArtifactKey> compositeRepository = loadArtifactsCompositeRepository( location );
+            final ICompositeRepository<IArtifactKey> compositeRepository =
+                loadArtifactsCompositeRepository( manager, location );
             compositeRepository.removeChild( childLocation );
         }
         finally
         {
+            if ( manager != null )
+            {
+                manager.getAgent().stop();
+            }
             getLock().readLock().unlock();
         }
     }
 
     public void addMetadataRepository( final URI location, final URI childLocation )
     {
+        final IMetadataRepositoryManager manager = null;
         try
         {
             getLock().readLock().lock();
             final ICompositeRepository<IInstallableUnit> compositeRepository =
-                loadMetadataCompositeRepository( location );
+                loadMetadataCompositeRepository( manager, location );
             compositeRepository.addChild( childLocation );
         }
         finally
         {
+            if ( manager != null )
+            {
+                manager.getAgent().stop();
+            }
             getLock().readLock().unlock();
         }
     }
 
     public void removeMetadataRepository( final URI location, final URI childLocation )
     {
+        final IMetadataRepositoryManager manager = null;
         try
         {
             getLock().readLock().lock();
             final ICompositeRepository<IInstallableUnit> compositeRepository =
-                loadMetadataCompositeRepository( location );
+                loadMetadataCompositeRepository( manager, location );
             compositeRepository.removeChild( childLocation );
         }
         finally
         {
+            if ( manager != null )
+            {
+                manager.getAgent().stop();
+            }
             getLock().readLock().unlock();
         }
     }
 
-    private ICompositeRepository<IArtifactKey> loadArtifactsCompositeRepository( final URI location )
+    private ICompositeRepository<IArtifactKey> loadArtifactsCompositeRepository( final IArtifactRepositoryManager manager,
+                                                                                 final URI location )
     {
         try
         {
-            if ( getProvider() == null )
-            {
-                throw new RuntimeException(
-                    "Cannot load composite repository as there is no provisioning agent provider" );
-            }
-            final IProvisioningAgent agent = getProvider().createAgent( location.resolve( ".p2" ) );
-            final IArtifactRepositoryManager manager =
-                (IArtifactRepositoryManager) agent.getService( IArtifactRepositoryManager.SERVICE_NAME );
-            if ( manager == null )
-            {
-                throw new RuntimeException(
-                    "Cannot load composite repository as artifact repository manager coud not be created" );
-            }
             IArtifactRepository repository = null;
             try
             {
@@ -128,23 +138,29 @@ public class CompositeRepositoryService
         }
     }
 
-    private ICompositeRepository<IInstallableUnit> loadMetadataCompositeRepository( final URI location )
+    private IArtifactRepositoryManager getArtifactRepositoryManager( final URI location )
+        throws ProvisionException
+    {
+        if ( getProvider() == null )
+        {
+            throw new RuntimeException( "Cannot load composite repository as there is no provisioning agent provider" );
+        }
+        final IProvisioningAgent agent = getProvider().createAgent( location.resolve( ".p2" ) );
+        final IArtifactRepositoryManager manager =
+            (IArtifactRepositoryManager) agent.getService( IArtifactRepositoryManager.SERVICE_NAME );
+        if ( manager == null )
+        {
+            throw new RuntimeException(
+                "Cannot load composite repository as artifact repository manager coud not be created" );
+        }
+        return manager;
+    }
+
+    private ICompositeRepository<IInstallableUnit> loadMetadataCompositeRepository( final IMetadataRepositoryManager manager,
+                                                                                    final URI location )
     {
         try
         {
-            if ( getProvider() == null )
-            {
-                throw new RuntimeException(
-                    "Cannot load composite repository as there is no provisioning agent provider" );
-            }
-            final IProvisioningAgent agent = getProvider().createAgent( location.resolve( ".p2" ) );
-            final IMetadataRepositoryManager manager =
-                (IMetadataRepositoryManager) agent.getService( IMetadataRepositoryManager.SERVICE_NAME );
-            if ( manager == null )
-            {
-                throw new RuntimeException(
-                    "Cannot load composite repository as metadata repository manager coud not be created" );
-            }
             IMetadataRepository repository = null;
             try
             {
@@ -176,6 +192,24 @@ public class CompositeRepositoryService
         {
             throw new RuntimeException( "Cannot load composite repository. Reason: " + e.getMessage(), e );
         }
+    }
+
+    private IMetadataRepositoryManager getMetadataRepositoryManager( final URI location )
+        throws ProvisionException
+    {
+        if ( getProvider() == null )
+        {
+            throw new RuntimeException( "Cannot load composite repository as there is no provisioning agent provider" );
+        }
+        final IProvisioningAgent agent = getProvider().createAgent( location.resolve( ".p2" ) );
+        final IMetadataRepositoryManager manager =
+            (IMetadataRepositoryManager) agent.getService( IMetadataRepositoryManager.SERVICE_NAME );
+        if ( manager == null )
+        {
+            throw new RuntimeException(
+                "Cannot load composite repository as metadata repository manager coud not be created" );
+        }
+        return manager;
     }
 
 }
