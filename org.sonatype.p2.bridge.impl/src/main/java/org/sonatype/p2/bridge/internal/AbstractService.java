@@ -48,7 +48,7 @@ abstract class AbstractService
     IProvisioningAgent createProvisioningAgent()
         throws ProvisionException
     {
-        final File agentDir = Utils.createTempFile( "org.sonatype.p2.bridge.agent-", "", null );
+        final File agentDir = Utils.createTempFile( "p2-agent-", "", null );
         agentDir.mkdirs();
         agentDir.deleteOnExit();
         final URI p2AgentLocation = agentDir.toURI();

@@ -323,7 +323,7 @@ public class ArtifactRepositoryService
 
             p2AuthSession.setCredentials( location, username, password );
 
-            manager = getManager( null );
+            manager = getManager( Utils.temporaryAgentLocationFor( location ) );
             final boolean isNewRepository = !manager.contains( location );
             final IProgressMonitor monitor = new NullProgressMonitor();
             try
@@ -380,10 +380,11 @@ public class ArtifactRepositoryService
             }
             finally
             {
-                if ( isNewRepository )
-                {
-                    manager.removeRepository( location );
-                }
+                // NXCM-4111: do not remove the repository so subsequent calls can reuse it out of cache
+                // if ( isNewRepository )
+                // {
+                // manager.removeRepository( location );
+                // }
             }
         }
         catch ( final ProvisionException e )
@@ -725,7 +726,7 @@ public class ArtifactRepositoryService
         URI p2AgentLocation = location;
         if ( p2AgentLocation == null )
         {
-            final File agentDir = Utils.createTempFile( "org.sonatype.p2.bridge.agent-", "", null );
+            final File agentDir = Utils.createTempFile( "p2-agent-", "", null );
             agentDir.mkdirs();
             agentDir.deleteOnExit();
             p2AgentLocation = agentDir.toURI();
