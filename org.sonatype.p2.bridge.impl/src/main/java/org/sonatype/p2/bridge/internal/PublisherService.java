@@ -52,13 +52,15 @@ public class PublisherService
             agent = createProvisioningAgent();
 
             final PublisherInfo info = new PublisherInfo();
-            info.setArtifactRepository( org.eclipse.equinox.p2.publisher.Publisher.createArtifactRepository( agent,
-                repositoryLocation, null /* name */, false /* compress */, true /* reusePackedFiles */) );
-            info.setMetadataRepository( org.eclipse.equinox.p2.publisher.Publisher.createMetadataRepository( agent,
-                repositoryLocation, null /* name */, false /* append */, false /* compress */) );
+            info.setArtifactRepository( org.eclipse.equinox.p2.publisher.Publisher.createArtifactRepository(
+                agent, repositoryLocation, null /* name */, false /* compress */, true /* reusePackedFiles */
+            ) );
+            info.setMetadataRepository( org.eclipse.equinox.p2.publisher.Publisher.createMetadataRepository(
+                agent, repositoryLocation, null /* name */, false /* append */, false /* compress */
+            ) );
 
             new org.eclipse.equinox.p2.publisher.Publisher( info ).publish(
-                new IPublisherAction[] { new LocalUpdateSiteAction( location.getAbsolutePath(), null ) },
+                new IPublisherAction[]{ new LocalUpdateSiteAction( location.getAbsolutePath(), null ) },
                 new NullProgressMonitor() );
         }
         catch ( final ProvisionException e )
@@ -88,7 +90,7 @@ public class PublisherService
         bundlesAction.perform( request, result, monitor );
 
         return translate( generateCapabilities, generateRequirements, generateManifest,
-            result.query( QueryUtil.createIUAnyQuery(), monitor ).toSet() );
+                          result.query( QueryUtil.createIUAnyQuery(), monitor ).toSet() );
     }
 
     private Collection<InstallableUnit> translate( final boolean generateCapabilities,
@@ -153,12 +155,12 @@ public class PublisherService
                 }
             }
 
-			if (generateManifest)
-			{
-				translateInstruction( "manifest", unit, result );
-			}
+            if ( generateManifest )
+            {
+                translateInstruction( "manifest", unit, result );
+            }
 
-			translateInstruction( "zipped", unit, result );
+            translateInstruction( "zipped", unit, result );
 
             results.add( result );
         }
@@ -173,12 +175,13 @@ public class PublisherService
      * method is called lots of times with different keys.
      * </p>
      *
-     * @param instructionKey the key to copy across from <code>fromInstallableUnit</code> to
-     *            <code>toInstallableUnit</code>
+     * @param instructionKey      the key to copy across from <code>fromInstallableUnit</code> to
+     *                            <code>toInstallableUnit</code>
      * @param fromInstallableUnit the source object
-     * @param toInstallableUnit the destination object
+     * @param toInstallableUnit   the destination object
      */
-    private void translateInstruction( String instructionKey, final IInstallableUnit fromInstallableUnit,
+    private void translateInstruction( String instructionKey,
+                                       final IInstallableUnit fromInstallableUnit,
                                        final InstallableUnit toInstallableUnit )
     {
         final Collection<ITouchpointData> touchpointData = fromInstallableUnit.getTouchpointData();
