@@ -153,33 +153,54 @@ public class PublisherService
                 }
             }
 
-            if ( generateManifest )
-            {
-                final Collection<ITouchpointData> touchpointData = unit.getTouchpointData();
-                if ( touchpointData != null )
-                {
-                    for ( final ITouchpointData touchpointDataEntry : touchpointData )
-                    {
-                        final ITouchpointInstruction instruction = touchpointDataEntry.getInstruction( "manifest" );
-                        if ( instruction != null )
-                        {
-                            final TouchpointInstruction resultTouchpointInstruction = new TouchpointInstruction();
-                            resultTouchpointInstruction.setKey( "manifest" );
-                            resultTouchpointInstruction.setBody( instruction.getBody() );
+			if (generateManifest)
+			{
+				translateInstruction( "manifest", unit, result );
+			}
 
-                            if ( result.getTouchpointData() == null )
-                            {
-                                result.setTouchpointData( new TouchpointData() );
-                            }
-                            result.getTouchpointData().addInstruction( resultTouchpointInstruction );
-                        }
-                    }
-                }
-            }
+			translateInstruction( "zipped", unit, result );
 
             results.add( result );
         }
         return results;
+    }
+
+    /**
+     * Translate the specified <code>instructionKey</code> from the Eclipse InstallableUnit to the Sonatype Bridge
+     * Installable Unit.
+     * <p>
+     * Note: This loops over the touchpointData entries pulling out the specified key. This may not scale well if this
+     * method is called lots of times with different keys.
+     * </p>
+     *
+     * @param instructionKey the key to copy across from <code>fromInstallableUnit</code> to
+     *            <code>toInstallableUnit</code>
+     * @param fromInstallableUnit the source object
+     * @param toInstallableUnit the destination object
+     */
+    private void translateInstruction( String instructionKey, final IInstallableUnit fromInstallableUnit,
+                                       final InstallableUnit toInstallableUnit )
+    {
+        final Collection<ITouchpointData> touchpointData = fromInstallableUnit.getTouchpointData();
+        if ( touchpointData != null )
+        {
+            for ( final ITouchpointData touchpointDataEntry : touchpointData )
+            {
+                final ITouchpointInstruction instruction = touchpointDataEntry.getInstruction( instructionKey );
+                if ( instruction != null )
+                {
+                    final TouchpointInstruction resultTouchpointInstruction = new TouchpointInstruction();
+                    resultTouchpointInstruction.setKey( instructionKey );
+                    resultTouchpointInstruction.setBody( instruction.getBody() );
+
+                    if ( toInstallableUnit.getTouchpointData() == null )
+                    {
+                        toInstallableUnit.setTouchpointData( new TouchpointData() );
+                    }
+                    toInstallableUnit.getTouchpointData().addInstruction( resultTouchpointInstruction );
+                }
+            }
+        }
     }
 
 }
