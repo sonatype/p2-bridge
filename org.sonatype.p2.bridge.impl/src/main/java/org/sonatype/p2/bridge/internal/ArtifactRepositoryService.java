@@ -352,7 +352,11 @@ public class ArtifactRepositoryService
                     getMemberRepositories( manager, remoteRepository, monitor, "" /* indent */);
 
                 final Map<String, String> repositoryProperties =
-                    new LinkedHashMap<String, String>( calculateRepositoryProperties( memberRepositories ) );
+                    new LinkedHashMap<String, String>(
+                        calculateRepositoryProperties(
+                            memberRepositories, remoteRepository instanceof ICompositeRepository
+                        )
+                    );
 
                 final IQueryResult<IArtifactDescriptor> descriptorsQuery =
                     remoteRepository.descriptorQueryable().query( ArtifactDescriptorQuery.ALL_DESCRIPTORS,
@@ -490,7 +494,9 @@ public class ArtifactRepositoryService
         }
     }
 
-    private Map<String, String> calculateRepositoryProperties( final Collection<SimpleArtifactRepository> memberRepositories )
+    private Map<String, String> calculateRepositoryProperties(
+        final Collection<SimpleArtifactRepository> memberRepositories,
+        final boolean isCompositeRepository )
     {
         final Map<String, String> allSimpleArtifactRepositoryProperties = new LinkedHashMap<String, String>();
         boolean publishPackFilesAsSiblings = false;
@@ -506,7 +512,7 @@ public class ArtifactRepositoryService
                 allSimpleArtifactRepositoryProperties.putAll( repositoryProperties );
             }
         }
-        if ( memberRepositories.size() > 1 )
+        if ( memberRepositories.size() > 1 || isCompositeRepository )
         {
             // If we have more than one source artifact repository, we
             // cannot use the source repository
