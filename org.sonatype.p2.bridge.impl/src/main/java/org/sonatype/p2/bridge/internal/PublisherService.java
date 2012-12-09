@@ -119,6 +119,7 @@ public class PublisherService
 
             result.setId( unit.getId() );
             result.setVersion( unit.getVersion().toString() );
+            result.setSingleton( unit.isSingleton() );
            
             if ( generateProperties )
             {
