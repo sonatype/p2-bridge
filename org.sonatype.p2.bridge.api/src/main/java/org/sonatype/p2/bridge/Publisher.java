@@ -21,4 +21,17 @@ public interface Publisher
     Collection<InstallableUnit> generateIUs( final boolean generateCapabilities, final boolean generateRequirements,
                                              final boolean generateManifest, final File... bundles );
 
+    /**
+     * Generates the IUs for the passed eclipse features.
+     * 
+     * @param generateCapabilities
+     *            True to generate the capabilities entries for the features
+     * @param generateRequirements
+     *            True to generate the requirement entries for the features
+     * @param features
+     *            The features to process
+     * @return The installable units for the given features
+     */
+    Collection<InstallableUnit> generateFeatureIUs( final boolean generateCapabilities, final boolean generateRequirements,
+                                                    final File... features);
 }
