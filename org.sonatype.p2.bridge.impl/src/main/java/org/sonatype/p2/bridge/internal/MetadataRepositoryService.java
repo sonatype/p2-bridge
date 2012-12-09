@@ -334,7 +334,11 @@ public class MetadataRepositoryService
             destinationManager = getManager( null );
             final IMetadataRepository destinationRepository = getRepository( destinationManager, destination );
 
-            destinationRepository.addInstallableUnits( unitsQuery.toSet() );
+            final Set<IInstallableUnit> newUnits = unitsQuery.toSet();
+            // remove the old descriptors to avoid stale data (otherwise the artifact and p2 metadata don't match)
+            // as we are not living in a 'perfect' world redeploying of an IU with the same version may happen
+            destinationRepository.removeInstallableUnits( newUnits );
+            destinationRepository.addInstallableUnits( newUnits );
         }
         catch ( final ProvisionException e )
         {
