@@ -430,7 +430,14 @@ public class ArtifactRepositoryService
             destinationManager = getManager( null );
             final IArtifactRepository destinationRepository = getRepository( destinationManager, destination );
 
-            destinationRepository.addDescriptors( descriptorsQuery.toArray( IArtifactDescriptor.class ), monitor );
+            final IArtifactDescriptor[] newDescriptors = descriptorsQuery.toArray( IArtifactDescriptor.class );
+            // remove the old descriptors to avoid stale data (otherwise the artifact and p2 metadata don't match)
+            // as we are not living in a 'perfect' world redeploying of an IU with the same version may happen
+            for ( IArtifactDescriptor d : newDescriptors )
+            {
+                destinationRepository.removeDescriptor( d.getArtifactKey(), monitor );
+            }
+            destinationRepository.addDescriptors( newDescriptors, monitor );
         }
         catch ( final ProvisionException e )
         {

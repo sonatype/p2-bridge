@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Sonatype P2 Bridge Implementation
 Bundle-SymbolicName: org.sonatype.p2.bridge.impl
-Bundle-Version: 1.1.4
+Bundle-Version: 1.1.5
 Bundle-Vendor: Sonatype, Inc.
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: org.eclipse.core.runtime.preferences;version="[3.3.0,4.0.0)",
