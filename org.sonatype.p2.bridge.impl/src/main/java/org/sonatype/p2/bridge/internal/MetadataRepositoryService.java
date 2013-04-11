@@ -7,7 +7,6 @@
  */
 package org.sonatype.p2.bridge.internal;
 
-import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -437,15 +436,7 @@ public class MetadataRepositoryService
         {
             throw new RuntimeException( "Cannot load metadata repository as there is no provisioning agent provider" );
         }
-        URI p2AgentLocation = location;
-        if ( p2AgentLocation == null )
-        {
-            final File agentDir = Utils.createTempFile( "p2-agent-", "", null );
-            agentDir.mkdirs();
-            agentDir.deleteOnExit();
-            p2AgentLocation = agentDir.toURI();
-        }
-        final IProvisioningAgent agent = getProvider().createAgent( p2AgentLocation.resolve( ".p2" ) );
+        final IProvisioningAgent agent = createProvisioningAgent();
         final IMetadataRepositoryManager manager =
             (IMetadataRepositoryManager) agent.getService( IMetadataRepositoryManager.SERVICE_NAME );
         if ( manager == null )

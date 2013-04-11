@@ -52,7 +52,7 @@ abstract class AbstractService
         agentDir.mkdirs();
         agentDir.deleteOnExit();
         final URI p2AgentLocation = agentDir.toURI();
-        final IProvisioningAgent agent = getProvider().createAgent( p2AgentLocation );
+        final IProvisioningAgent agent = getProvider().createAgent( p2AgentLocation.resolve( ".p2" ) );
         return agent;
     }
 
