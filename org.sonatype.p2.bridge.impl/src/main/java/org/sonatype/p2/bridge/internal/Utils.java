@@ -20,6 +20,8 @@ import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Random;
+
+import org.eclipse.equinox.internal.p2.core.helpers.FileUtils;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 
 class Utils
@@ -81,6 +83,14 @@ class Utils
         return result;
     }
 
+    static File temporaryAgentLocation()
+    {
+        final File agentDir = Utils.createTempFile( "p2-agent-", "", null );
+        agentDir.mkdirs();
+        agentDir.deleteOnExit();
+        return agentDir;
+    }
+
     static URI temporaryAgentLocationFor( final URI location )
     {
         String parent = FrameworkProperties.getProperty( TEMPDIR_PROPERTY );
@@ -93,6 +103,21 @@ class Utils
         agentDir.deleteOnExit();
         final URI p2AgentLocation = agentDir.toURI();
         return p2AgentLocation;
+    }
+
+    static void deleteIfPossible( final File dir )
+    {
+        if ( dir != null )
+        {
+            try
+            {
+                FileUtils.deleteAll( dir );
+            }
+            catch ( Exception ignore )
+            {
+                // silently ignore failures
+            }
+        }
     }
 
     private static String getMd5Digest( final String content )
