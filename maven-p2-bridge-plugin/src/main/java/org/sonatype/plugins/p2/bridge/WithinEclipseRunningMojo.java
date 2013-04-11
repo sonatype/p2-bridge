@@ -40,10 +40,16 @@ abstract class WithinEclipseRunningMojo
 {
 
     /**
-     * @parameter expression="${project.build.directory}/p2/p2-agent"
+     * @parameter expression="${project.build.directory}/p2/runtime"
      * @required
      */
-    protected File p2AgentDirectory;
+    protected File p2RuntimeDirectory;
+
+    /**
+     * @parameter expression="${project.build.directory}/p2/tmp"
+     * @required
+     */
+    protected File p2TempDirectory;
 
     /**
      * @parameter expression="${plugin.artifacts}"
@@ -148,7 +154,7 @@ abstract class WithinEclipseRunningMojo
         }
 
         final EclipseLocation location =
-            locationFactory.createPackedEclipseLocation( eclipseArchiveFile, p2AgentDirectory, false );
+            locationFactory.createPackedEclipseLocation( eclipseArchiveFile, p2RuntimeDirectory, false );
         final EclipseInstance eclipse = eclipseBridge.createInstance( location );
         try
         {
@@ -175,15 +181,16 @@ abstract class WithinEclipseRunningMojo
     {
         final Map<String, String> launchProperties = new HashMap<String, String>();
         launchProperties.putAll( EclipseInstance.DEFAULT_LAUNCH_PROPERTIES );
+        launchProperties.put( EclipseInstance.TEMPDIR_PROPERTY, p2TempDirectory.getAbsolutePath() );
         if ( debugEclipse )
         {
-            launchProperties.put( "osgi.debug", p2AgentDirectory.getAbsolutePath() + "/eclipse/.options" );
+            launchProperties.put( "osgi.debug", p2RuntimeDirectory.getAbsolutePath() + "/eclipse/.options" );
         }
 
         // Better implementation that looks up the exported packages from the artifact
         launchProperties.put(
             "org.osgi.framework.system.packages.extra",
-            "org.sonatype.p2.bridge;version=\"1.0.5\",org.sonatype.p2.bridge.model;version=\"1.0.5\"" );
+            "org.sonatype.p2.bridge;version=\"1.1.6\",org.sonatype.p2.bridge.model;version=\"1.1.6\"" );
 
         return launchProperties;
     }
