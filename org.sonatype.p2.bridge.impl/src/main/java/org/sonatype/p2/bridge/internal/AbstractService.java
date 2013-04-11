@@ -45,13 +45,17 @@ abstract class AbstractService
         return provider;
     }
 
-    IProvisioningAgent createProvisioningAgent()
+    IProvisioningAgent createProvisioningAgent( final URI location )
         throws ProvisionException
     {
-        final File agentDir = Utils.createTempFile( "p2-agent-", "", null );
-        agentDir.mkdirs();
-        agentDir.deleteOnExit();
-        final URI p2AgentLocation = agentDir.toURI();
+    	URI p2AgentLocation = location;
+    	if( location == null )
+    	{
+    		final File agentDir = Utils.createTempFile( "p2-agent-", "", null );
+    		agentDir.mkdirs();
+    		agentDir.deleteOnExit();
+    		p2AgentLocation = agentDir.toURI();
+    	}
         final IProvisioningAgent agent = getProvider().createAgent( p2AgentLocation.resolve( ".p2" ) );
         return agent;
     }
