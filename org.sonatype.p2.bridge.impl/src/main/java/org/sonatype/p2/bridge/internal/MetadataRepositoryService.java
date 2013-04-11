@@ -436,7 +436,7 @@ public class MetadataRepositoryService
         {
             throw new RuntimeException( "Cannot load metadata repository as there is no provisioning agent provider" );
         }
-        final IProvisioningAgent agent = createProvisioningAgent();
+        final IProvisioningAgent agent = createProvisioningAgent( location );
         final IMetadataRepositoryManager manager =
             (IMetadataRepositoryManager) agent.getService( IMetadataRepositoryManager.SERVICE_NAME );
         if ( manager == null )

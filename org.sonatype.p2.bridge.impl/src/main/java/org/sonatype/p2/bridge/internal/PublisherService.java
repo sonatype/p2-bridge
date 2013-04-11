@@ -53,7 +53,7 @@ public class PublisherService
         {
             getLock().readLock().lock();
 
-            agent = createProvisioningAgent();
+            agent = createProvisioningAgent( null );
 
             final PublisherInfo info = new PublisherInfo();
             info.setArtifactRepository( org.eclipse.equinox.p2.publisher.Publisher.createArtifactRepository(

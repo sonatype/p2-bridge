@@ -736,7 +736,7 @@ public class ArtifactRepositoryService
         {
             throw new RuntimeException( "Cannot load artifact repository as there is no provisioning agent provider" );
         }
-        final IProvisioningAgent agent = createProvisioningAgent();
+        final IProvisioningAgent agent = createProvisioningAgent( location );
         final IArtifactRepositoryManager manager =
             (IArtifactRepositoryManager) agent.getService( IArtifactRepositoryManager.SERVICE_NAME );
         if ( manager == null )
