@@ -736,15 +736,7 @@ public class ArtifactRepositoryService
         {
             throw new RuntimeException( "Cannot load artifact repository as there is no provisioning agent provider" );
         }
-        URI p2AgentLocation = location;
-        if ( p2AgentLocation == null )
-        {
-            final File agentDir = Utils.createTempFile( "p2-agent-", "", null );
-            agentDir.mkdirs();
-            agentDir.deleteOnExit();
-            p2AgentLocation = agentDir.toURI();
-        }
-        final IProvisioningAgent agent = getProvider().createAgent( p2AgentLocation.resolve( ".p2" ) );
+        final IProvisioningAgent agent = createProvisioningAgent();
         final IArtifactRepositoryManager manager =
             (IArtifactRepositoryManager) agent.getService( IArtifactRepositoryManager.SERVICE_NAME );
         if ( manager == null )
