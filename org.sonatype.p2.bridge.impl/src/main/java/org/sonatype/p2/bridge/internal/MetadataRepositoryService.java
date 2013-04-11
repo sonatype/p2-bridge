@@ -7,6 +7,7 @@
  */
 package org.sonatype.p2.bridge.internal;
 
+import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -69,11 +70,12 @@ public class MetadataRepositoryService
                        final Map<String, String> properties )
     {
         IMetadataRepositoryManager manager = null;
+        final File agentDir = Utils.temporaryAgentLocation();
         try
         {
             getLock().readLock().lock();
 
-            manager = getManager( null );
+            manager = getManager( agentDir.toURI() );
 
             final IMetadataRepository repository = getOrCreateRepository( location, name, properties, manager );
 
@@ -94,6 +96,7 @@ public class MetadataRepositoryService
             {
                 manager.getAgent().stop();
             }
+            Utils.deleteIfPossible( agentDir );
             getLock().readLock().unlock();
         }
     }
@@ -118,7 +121,8 @@ public class MetadataRepositoryService
         {
             // repository does not exist. create it
             repository =
-                manager.createRepository( location, name, IMetadataRepositoryManager.TYPE_SIMPLE_REPOSITORY, properties );
+                manager.createRepository( location, name, IMetadataRepositoryManager.TYPE_SIMPLE_REPOSITORY,
+                                          properties );
         }
         return repository;
     }
@@ -126,11 +130,12 @@ public class MetadataRepositoryService
     public Collection<IUIdentity> getGroupIUs( final URI... metadataRepositories )
     {
         IMetadataRepositoryManager manager = null;
+        final File agentDir = Utils.temporaryAgentLocation();
         try
         {
             getLock().readLock().lock();
 
-            manager = getManager( null );
+            manager = getManager( agentDir.toURI() );
             final Collection<IMetadataRepository> repositories = getRepositories( manager, metadataRepositories );
 
             final IQueryResult<IInstallableUnit> results =
@@ -154,6 +159,7 @@ public class MetadataRepositoryService
             {
                 manager.getAgent().stop();
             }
+            Utils.deleteIfPossible( agentDir );
             getLock().readLock().unlock();
         }
     }
@@ -162,11 +168,12 @@ public class MetadataRepositoryService
                                                final URI... metadataRepositories )
     {
         IMetadataRepositoryManager manager = null;
+        final File agentDir = Utils.temporaryAgentLocation();
         try
         {
             getLock().readLock().lock();
 
-            manager = getManager( null );
+            manager = getManager( agentDir.toURI() );
             final Collection<IMetadataRepository> repositories = getRepositories( manager, metadataRepositories );
             final Collection<IUIdentity> found = new HashSet<IUIdentity>();
 
@@ -202,6 +209,7 @@ public class MetadataRepositoryService
             {
                 manager.getAgent().stop();
             }
+            Utils.deleteIfPossible( agentDir );
             getLock().readLock().unlock();
         }
     }
@@ -215,11 +223,12 @@ public class MetadataRepositoryService
     public Map<String, String> getProperties( final URI location )
     {
         IMetadataRepositoryManager manager = null;
+        final File agentDir = Utils.temporaryAgentLocation();
         try
         {
             getLock().readLock().lock();
 
-            manager = getManager( null );
+            manager = getManager( agentDir.toURI() );
             final IMetadataRepository repository = getRepositories( manager, location ).iterator().next();
 
             return Collections.unmodifiableMap( repository.getProperties() );
@@ -234,6 +243,7 @@ public class MetadataRepositoryService
             {
                 manager.getAgent().stop();
             }
+            Utils.deleteIfPossible( agentDir );
             getLock().readLock().unlock();
         }
     }
@@ -272,7 +282,8 @@ public class MetadataRepositoryService
             {
                 final IMetadataRepository remoteRepository = manager.loadRepository( location, monitor );
 
-                final IQueryResult<IInstallableUnit> unitsQuery = remoteRepository.query( QueryUtil.ALL_UNITS, monitor );
+                final IQueryResult<IInstallableUnit> unitsQuery =
+                    remoteRepository.query( QueryUtil.ALL_UNITS, monitor );
 
                 if ( manager.contains( destination ) )
                 {
@@ -315,13 +326,15 @@ public class MetadataRepositoryService
     {
         IMetadataRepositoryManager locationManager = null;
         IMetadataRepositoryManager destinationManager = null;
+        final File agentDir1 = Utils.temporaryAgentLocation();
+        final File agentDir2 = Utils.temporaryAgentLocation();
         try
         {
             getLock().readLock().lock();
 
             final NullProgressMonitor monitor = new NullProgressMonitor();
 
-            locationManager = getManager( null );
+            locationManager = getManager( agentDir1.toURI() );
             final IMetadataRepository sourceRepository = getRepository( locationManager, location );
 
             final IQueryResult<IInstallableUnit> unitsQuery = sourceRepository.query( QueryUtil.ALL_UNITS, monitor );
@@ -330,7 +343,7 @@ public class MetadataRepositoryService
                 return;
             }
 
-            destinationManager = getManager( null );
+            destinationManager = getManager( agentDir2.toURI() );
             final IMetadataRepository destinationRepository = getRepository( destinationManager, destination );
 
             final Set<IInstallableUnit> newUnits = unitsQuery.toSet();
@@ -342,7 +355,7 @@ public class MetadataRepositoryService
         catch ( final ProvisionException e )
         {
             throw new RuntimeException( String.format( "Cannot merge metadata repository [%s] into [%s] due to [%s]",
-                location, destination, e.getMessage() ), e );
+                                                       location, destination, e.getMessage() ), e );
         }
         finally
         {
@@ -354,6 +367,8 @@ public class MetadataRepositoryService
             {
                 destinationManager.getAgent().stop();
             }
+            Utils.deleteIfPossible( agentDir1 );
+            Utils.deleteIfPossible( agentDir2 );
             getLock().readLock().unlock();
         }
     }
@@ -362,13 +377,15 @@ public class MetadataRepositoryService
     {
         IMetadataRepositoryManager locationManager = null;
         IMetadataRepositoryManager destinationManager = null;
+        final File agentDir1 = Utils.temporaryAgentLocation();
+        final File agentDir2 = Utils.temporaryAgentLocation();
         try
         {
             getLock().readLock().lock();
 
             final NullProgressMonitor monitor = new NullProgressMonitor();
 
-            locationManager = getManager( null );
+            locationManager = getManager( agentDir1.toURI() );
             final IMetadataRepository sourceRepository = getRepository( locationManager, location );
 
             final IQueryResult<IInstallableUnit> unitsQuery = sourceRepository.query( QueryUtil.ALL_UNITS, monitor );
@@ -377,7 +394,7 @@ public class MetadataRepositoryService
                 return;
             }
 
-            destinationManager = getManager( null );
+            destinationManager = getManager( agentDir2.toURI() );
             final IMetadataRepository destinationRepository = getRepository( destinationManager, destination );
 
             destinationRepository.removeInstallableUnits( unitsQuery.toSet() );
@@ -385,7 +402,7 @@ public class MetadataRepositoryService
         catch ( final ProvisionException e )
         {
             throw new RuntimeException( String.format( "Cannot remove metadata repository [%s] from [%s] due to [%s]",
-                location, destination, e.getMessage() ), e );
+                                                       location, destination, e.getMessage() ), e );
         }
         finally
         {
@@ -397,6 +414,8 @@ public class MetadataRepositoryService
             {
                 destinationManager.getAgent().stop();
             }
+            Utils.deleteIfPossible( agentDir1 );
+            Utils.deleteIfPossible( agentDir2 );
             getLock().readLock().unlock();
         }
     }
@@ -661,8 +680,9 @@ public class MetadataRepositoryService
         {
             requirement =
                 MetadataFactory.createRequirement( unitRC.getNamespace(), unitRC.getName(),
-                    new VersionRange( unitRC.getRange() ), unitRC.getFilter(), unitRC.isOptional(),
-                    unitRC.isMultiple(), unitRC.isGreedy() );
+                                                   new VersionRange( unitRC.getRange() ), unitRC.getFilter(),
+                                                   unitRC.isOptional(),
+                                                   unitRC.isMultiple(), unitRC.isGreedy() );
         }
         else
         {
@@ -687,7 +707,7 @@ public class MetadataRepositoryService
             // TODO handle filter
             requirement =
                 MetadataFactory.createRequirement( matchExpr, null /* filter */, unitRC.getMin(), unitRC.getMax(),
-                    unitRC.isGreedy(), null );
+                                                   unitRC.isGreedy(), null );
         }
         return requirement;
     }
@@ -706,7 +726,7 @@ public class MetadataRepositoryService
             {
                 final IProvidedCapability providedCapability =
                     MetadataFactory.createProvidedCapability( unitPC.getNamespace(), unitPC.getName(),
-                        Version.create( unitPC.getVersion() ) );
+                                                              Version.create( unitPC.getVersion() ) );
                 providedCapabilities.add( providedCapability );
             }
         }
@@ -739,7 +759,7 @@ public class MetadataRepositoryService
 
         final IUpdateDescriptor updateDescriptor =
             MetadataFactory.createUpdateDescriptor( unitUD.getId(), new VersionRange( unitUD.getRange() ), severity,
-                null );
+                                                    null );
 
         description.setUpdateDescriptor( updateDescriptor );
     }
