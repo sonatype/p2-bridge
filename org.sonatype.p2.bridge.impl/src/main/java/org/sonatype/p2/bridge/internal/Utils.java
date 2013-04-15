@@ -14,8 +14,18 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Random;
 
+import org.eclipse.equinox.internal.p2.core.helpers.FileUtils;
+import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
+
 class Utils
 {
+
+    /**
+     * Key of property containing path to a directory to be used as temp dir.
+     *
+     * @since 1.1.6
+     */
+    public static final String TEMPDIR_PROPERTY = "p2.bridge.tempdir";
 
     static String join( final Collection<String> toJoin )
     {
@@ -40,8 +50,12 @@ class Utils
 
     static File createTempFile( final String prefix, final String suffix, final File parentDir )
     {
-        File result = null;
-        String parent = System.getProperty( "java.io.tmpdir" );
+        File result;
+        String parent = FrameworkProperties.getProperty( TEMPDIR_PROPERTY );
+        if ( parent == null )
+        {
+            parent = System.getProperty( "java.io.tmpdir" );
+        }
         if ( parentDir != null )
         {
             parent = parentDir.getPath();
@@ -62,14 +76,41 @@ class Utils
         return result;
     }
 
+    static File temporaryAgentLocation()
+    {
+        final File agentDir = Utils.createTempFile( "p2-agent-", "", null );
+        agentDir.mkdirs();
+        agentDir.deleteOnExit();
+        return agentDir;
+    }
+
     static URI temporaryAgentLocationFor( final URI location )
     {
-        final String parent = System.getProperty( "java.io.tmpdir" );
+        String parent = FrameworkProperties.getProperty( TEMPDIR_PROPERTY );
+        if ( parent == null )
+        {
+            parent = System.getProperty( "java.io.tmpdir" );
+        }
         final File agentDir = new File( parent, "p2-proxy-" + getMd5Digest( location.toASCIIString() ) );
         agentDir.mkdirs();
         agentDir.deleteOnExit();
         final URI p2AgentLocation = agentDir.toURI();
         return p2AgentLocation;
+    }
+
+    static void deleteIfPossible( final File dir )
+    {
+        if ( dir != null )
+        {
+            try
+            {
+                FileUtils.deleteAll( dir );
+            }
+            catch ( Exception ignore )
+            {
+                // silently ignore failures
+            }
+        }
     }
 
     private static String getMd5Digest( final String content )

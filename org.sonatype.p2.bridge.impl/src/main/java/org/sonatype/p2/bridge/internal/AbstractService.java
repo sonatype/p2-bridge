@@ -7,7 +7,6 @@
  */
 package org.sonatype.p2.bridge.internal;
 
-import java.io.File;
 import java.net.URI;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -18,6 +17,7 @@ import org.eclipse.equinox.p2.core.ProvisionException;
 
 abstract class AbstractService
 {
+
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
     private IProvisioningAgentProvider provider;
@@ -45,15 +45,10 @@ abstract class AbstractService
         return provider;
     }
 
-    IProvisioningAgent createProvisioningAgent()
+    IProvisioningAgent createProvisioningAgent( final URI location )
         throws ProvisionException
     {
-        final File agentDir = Utils.createTempFile( "p2-agent-", "", null );
-        agentDir.mkdirs();
-        agentDir.deleteOnExit();
-        final URI p2AgentLocation = agentDir.toURI();
-        final IProvisioningAgent agent = getProvider().createAgent( p2AgentLocation );
-        return agent;
+        return getProvider().createAgent( location.resolve( ".p2" ) );
     }
 
     ReadWriteLock getLock()

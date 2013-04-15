@@ -15,6 +15,13 @@ public interface EclipseInstance
 {
     public static Map<String, String> DEFAULT_LAUNCH_PROPERTIES = DefaultLaunchProperties.get();
 
+    /**
+     * Key of property containing path to a directory to be used as temp dir.
+     *
+     * @since 1.1.6
+     */
+    public static final String TEMPDIR_PROPERTY = "p2.bridge.tempdir";
+
     EclipseInstance start( Map<String, String> launchProperties );
 
     EclipseInstance shutdown();

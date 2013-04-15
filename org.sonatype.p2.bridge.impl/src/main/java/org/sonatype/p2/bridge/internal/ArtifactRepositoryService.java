@@ -25,7 +25,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
@@ -68,11 +67,12 @@ public class ArtifactRepositoryService
                        final Map<String, String> properties, final String[][] mappings )
     {
         IArtifactRepositoryManager manager = null;
+        final File agentDir = Utils.temporaryAgentLocation();
         try
         {
             getLock().readLock().lock();
 
-            manager = getManager( null );
+            manager = getManager( agentDir.toURI() );
             final IArtifactRepository repository = getOrCreateRepository( location, name, properties, manager );
             if ( mappings != null )
             {
@@ -90,6 +90,7 @@ public class ArtifactRepositoryService
             {
                 manager.getAgent().stop();
             }
+            Utils.deleteIfPossible( agentDir );
             getLock().readLock().unlock();
         }
     }
@@ -114,7 +115,8 @@ public class ArtifactRepositoryService
         {
             // repository does not exist. create it
             repository =
-                manager.createRepository( location, name, IArtifactRepositoryManager.TYPE_SIMPLE_REPOSITORY, properties );
+                manager.createRepository( location, name, IArtifactRepositoryManager.TYPE_SIMPLE_REPOSITORY,
+                                          properties );
         }
 
         if ( repository == null )
@@ -132,11 +134,12 @@ public class ArtifactRepositoryService
     public void resolve( final URI location, final ArtifactResolver artifactResolver )
     {
         IArtifactRepositoryManager manager = null;
+        final File agentDir = Utils.temporaryAgentLocation();
         try
         {
             getLock().readLock().lock();
 
-            manager = getManager( null );
+            manager = getManager( agentDir.toURI() );
             final IArtifactRepository repository = getRepository( manager, location );
             if ( !( repository instanceof SimpleArtifactRepository ) )
             {
@@ -146,7 +149,7 @@ public class ArtifactRepositoryService
 
             final IQueryResult<IArtifactDescriptor> descriptors =
                 repository.descriptorQueryable().query( ArtifactDescriptorQuery.ALL_DESCRIPTORS,
-                    new NullProgressMonitor() );
+                                                        new NullProgressMonitor() );
 
             if ( descriptors.isEmpty() )
             {
@@ -226,6 +229,7 @@ public class ArtifactRepositoryService
             {
                 manager.getAgent().stop();
             }
+            Utils.deleteIfPossible( agentDir );
             getLock().readLock().unlock();
         }
     }
@@ -233,13 +237,14 @@ public class ArtifactRepositoryService
     public Collection<InstallableArtifact> getInstallableArtifacts( final URI location )
     {
         IArtifactRepositoryManager manager = null;
+        final File agentDir = Utils.temporaryAgentLocation();
         try
         {
             getLock().readLock().lock();
 
             final NullProgressMonitor monitor = new NullProgressMonitor();
 
-            manager = getManager( null );
+            manager = getManager( agentDir.toURI() );
             final IArtifactRepository repository = getRepository( manager, location );
             final IQueryResult<IArtifactDescriptor> descriptorsQuery =
                 repository.descriptorQueryable().query( ArtifactDescriptorQuery.ALL_DESCRIPTORS, monitor );
@@ -282,6 +287,7 @@ public class ArtifactRepositoryService
             {
                 manager.getAgent().stop();
             }
+            Utils.deleteIfPossible( agentDir );
             getLock().readLock().unlock();
         }
     }
@@ -289,11 +295,12 @@ public class ArtifactRepositoryService
     public Map<String, String> getProperties( final URI location )
     {
         IArtifactRepositoryManager manager = null;
+        final File agentDir = Utils.temporaryAgentLocation();
         try
         {
             getLock().readLock().lock();
 
-            manager = getManager( null );
+            manager = getManager( agentDir.toURI() );
             final IArtifactRepository repository = getRepository( manager, location );
 
             return Collections.unmodifiableMap( repository.getProperties() );
@@ -308,6 +315,7 @@ public class ArtifactRepositoryService
             {
                 manager.getAgent().stop();
             }
+            Utils.deleteIfPossible( agentDir );
             getLock().readLock().unlock();
         }
     }
@@ -349,7 +357,7 @@ public class ArtifactRepositoryService
                 final IArtifactRepository remoteRepository = manager.loadRepository( location, monitor );
 
                 final Collection<SimpleArtifactRepository> memberRepositories =
-                    getMemberRepositories( manager, remoteRepository, monitor, "" /* indent */);
+                    getMemberRepositories( manager, remoteRepository, monitor, "" /* indent */ );
 
                 final Map<String, String> repositoryProperties =
                     new LinkedHashMap<String, String>(
@@ -360,7 +368,7 @@ public class ArtifactRepositoryService
 
                 final IQueryResult<IArtifactDescriptor> descriptorsQuery =
                     remoteRepository.descriptorQueryable().query( ArtifactDescriptorQuery.ALL_DESCRIPTORS,
-                        new NullProgressMonitor() );
+                                                                  new NullProgressMonitor() );
 
                 if ( manager.contains( destination ) )
                 {
@@ -411,13 +419,15 @@ public class ArtifactRepositoryService
     {
         IArtifactRepositoryManager locationManager = null;
         IArtifactRepositoryManager destinationManager = null;
+        final File agentDir1 = Utils.temporaryAgentLocation();
+        final File agentDir2 = Utils.temporaryAgentLocation();
         try
         {
             getLock().readLock().lock();
 
             final NullProgressMonitor monitor = new NullProgressMonitor();
 
-            locationManager = getManager( null );
+            locationManager = getManager( agentDir1.toURI() );
             final IArtifactRepository sourceRepository = getRepository( locationManager, location );
 
             final IQueryResult<IArtifactDescriptor> descriptorsQuery =
@@ -427,7 +437,7 @@ public class ArtifactRepositoryService
                 return;
             }
 
-            destinationManager = getManager( null );
+            destinationManager = getManager( agentDir2.toURI() );
             final IArtifactRepository destinationRepository = getRepository( destinationManager, destination );
 
             final IArtifactDescriptor[] newDescriptors = descriptorsQuery.toArray( IArtifactDescriptor.class );
@@ -442,7 +452,7 @@ public class ArtifactRepositoryService
         catch ( final ProvisionException e )
         {
             throw new RuntimeException( String.format( "Cannot merge artifact repository [%s] into [%s] due to [%s]",
-                location, destination, e.getMessage() ), e );
+                                                       location, destination, e.getMessage() ), e );
         }
         finally
         {
@@ -454,6 +464,8 @@ public class ArtifactRepositoryService
             {
                 destinationManager.getAgent().stop();
             }
+            Utils.deleteIfPossible( agentDir1 );
+            Utils.deleteIfPossible( agentDir2 );
             getLock().readLock().unlock();
         }
     }
@@ -462,13 +474,15 @@ public class ArtifactRepositoryService
     {
         IArtifactRepositoryManager locationManager = null;
         IArtifactRepositoryManager destinationManager = null;
+        final File agentDir1 = Utils.temporaryAgentLocation();
+        final File agentDir2 = Utils.temporaryAgentLocation();
         try
         {
             getLock().readLock().lock();
 
             final NullProgressMonitor monitor = new NullProgressMonitor();
 
-            locationManager = getManager( null );
+            locationManager = getManager( agentDir1.toURI() );
             final IArtifactRepository sourceRepository = getRepository( locationManager, location );
             final IQueryResult<IArtifactDescriptor> descriptorsQuery =
                 sourceRepository.descriptorQueryable().query( ArtifactDescriptorQuery.ALL_DESCRIPTORS, monitor );
@@ -477,7 +491,7 @@ public class ArtifactRepositoryService
                 return;
             }
 
-            destinationManager = getManager( null );
+            destinationManager = getManager( agentDir2.toURI() );
             final IArtifactRepository destinationRepository = getRepository( destinationManager, destination );
 
             destinationRepository.removeDescriptors( descriptorsQuery.toArray( IArtifactDescriptor.class ), monitor );
@@ -485,7 +499,7 @@ public class ArtifactRepositoryService
         catch ( final ProvisionException e )
         {
             throw new RuntimeException( String.format( "Cannot remove artifact repository [%s] from [%s] due to [%s]",
-                location, destination, e.getMessage() ), e );
+                                                       location, destination, e.getMessage() ), e );
         }
         finally
         {
@@ -497,6 +511,8 @@ public class ArtifactRepositoryService
             {
                 destinationManager.getAgent().stop();
             }
+            Utils.deleteIfPossible( agentDir1 );
+            Utils.deleteIfPossible( agentDir2 );
             getLock().readLock().unlock();
         }
     }
@@ -569,7 +585,7 @@ public class ArtifactRepositoryService
             else if ( !output1.equals( output2 ) )
             {
                 throw new RuntimeException( "Incompatible artifact repository rules for filter '" + filter2
-                    + "': output1='" + output1 + "', output2='" + output2 + "'" );
+                                                + "': output1='" + output1 + "', output2='" + output2 + "'" );
             }
         }
     }
@@ -578,10 +594,10 @@ public class ArtifactRepositoryService
      * Gathers all SimpleArtifactRepositories referenced from the specified repository (recursively). If the specified
      * artifact repository is a SimpleArtifactRepository, the returned list will only contain the specified artifact
      * repository.
-     * 
-     * @param manager The artifact repository manager that will be used to load all repositories
+     *
+     * @param manager    The artifact repository manager that will be used to load all repositories
      * @param repository The start artifact repository
-     * @param result The list of all referenced simple artifact repositories
+     * @param result     The list of all referenced simple artifact repositories
      */
     private Collection<SimpleArtifactRepository> getMemberRepositories( final IArtifactRepositoryManager manager,
                                                                         final IArtifactRepository repository,
@@ -659,7 +675,8 @@ public class ArtifactRepositoryService
                             else
                             {
                                 throw new RuntimeException( "Cannot get remote path for repository '"
-                                    + repository.getName() + "', artifact '" + artifactDescriptor + "'." );
+                                                                + repository.getName() + "', artifact '"
+                                                                + artifactDescriptor + "'." );
                             }
                         }
                         else
@@ -685,7 +702,7 @@ public class ArtifactRepositoryService
                             else
                             {
                                 throw new RuntimeException( "Could not get remote path for artifact "
-                                    + artifactDescriptor );
+                                                                + artifactDescriptor );
                             }
 
                             iterArtifactDescriptors.remove();
@@ -736,15 +753,7 @@ public class ArtifactRepositoryService
         {
             throw new RuntimeException( "Cannot load artifact repository as there is no provisioning agent provider" );
         }
-        URI p2AgentLocation = location;
-        if ( p2AgentLocation == null )
-        {
-            final File agentDir = Utils.createTempFile( "p2-agent-", "", null );
-            agentDir.mkdirs();
-            agentDir.deleteOnExit();
-            p2AgentLocation = agentDir.toURI();
-        }
-        final IProvisioningAgent agent = getProvider().createAgent( p2AgentLocation.resolve( ".p2" ) );
+        final IProvisioningAgent agent = createProvisioningAgent( location );
         final IArtifactRepositoryManager manager =
             (IArtifactRepositoryManager) agent.getService( IArtifactRepositoryManager.SERVICE_NAME );
         if ( manager == null )
@@ -762,7 +771,7 @@ public class ArtifactRepositoryService
         {
             final IArtifactKey artifactKey =
                 repository.createArtifactKey( artifact.getClassifier(), artifact.getId(),
-                    Version.parseVersion( artifact.getVersion() ) );
+                                              Version.parseVersion( artifact.getVersion() ) );
             File artifactFile = null;
             if ( artifact.getPath() != null )
             {
