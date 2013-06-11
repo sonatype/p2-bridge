@@ -7,6 +7,7 @@
  */
 package org.sonatype.p2.bridge.internal;
 
+import java.io.File;
 import java.net.URI;
 
 import org.eclipse.equinox.internal.p2.artifact.repository.CompositeArtifactRepository;
@@ -27,15 +28,25 @@ public class CompositeRepositoryService
     implements CompositeRepository
 {
 
-    public void addArtifactsRepository( final URI location, final URI childLocation )
+    public void addArtifactsRepository( final URI location, final URI... childLocations )
     {
-        final IArtifactRepositoryManager manager = null;
+        IArtifactRepositoryManager manager = null;
+        final File agentDir = Utils.temporaryAgentLocation();
         try
         {
             getLock().readLock().lock();
-            final ICompositeRepository<IArtifactKey> compositeRepository =
-                loadArtifactsCompositeRepository( manager, location );
-            compositeRepository.addChild( childLocation );
+            manager = getArtifactRepositoryManager( agentDir.toURI() );
+            final ICompositeRepository<IArtifactKey> compositeRepository = loadArtifactsCompositeRepository(
+                manager, location
+            );
+            for ( final URI childLocation : childLocations )
+            {
+                compositeRepository.addChild( childLocation );
+            }
+        }
+        catch ( final ProvisionException e )
+        {
+            throw new RuntimeException( "Cannot write composite artifact repository. Reason: " + e.getMessage(), e );
         }
         finally
         {
@@ -43,19 +54,30 @@ public class CompositeRepositoryService
             {
                 manager.getAgent().stop();
             }
+            Utils.deleteIfPossible( agentDir );
             getLock().readLock().unlock();
         }
     }
 
-    public void removeArtifactsRepository( final URI location, final URI childLocation )
+    public void removeArtifactsRepository( final URI location, final URI... childLocations )
     {
-        final IArtifactRepositoryManager manager = null;
+        IArtifactRepositoryManager manager = null;
+        final File agentDir = Utils.temporaryAgentLocation();
         try
         {
             getLock().readLock().lock();
-            final ICompositeRepository<IArtifactKey> compositeRepository =
-                loadArtifactsCompositeRepository( manager, location );
-            compositeRepository.removeChild( childLocation );
+            manager = getArtifactRepositoryManager( agentDir.toURI() );
+            final ICompositeRepository<IArtifactKey> compositeRepository = loadArtifactsCompositeRepository(
+                manager, location
+            );
+            for ( final URI childLocation : childLocations )
+            {
+                compositeRepository.removeChild( childLocation );
+            }
+        }
+        catch ( final ProvisionException e )
+        {
+            throw new RuntimeException( "Cannot write composite artifact repository. Reason: " + e.getMessage(), e );
         }
         finally
         {
@@ -63,19 +85,30 @@ public class CompositeRepositoryService
             {
                 manager.getAgent().stop();
             }
+            Utils.deleteIfPossible( agentDir );
             getLock().readLock().unlock();
         }
     }
 
-    public void addMetadataRepository( final URI location, final URI childLocation )
+    public void addMetadataRepository( final URI location, final URI... childLocations )
     {
-        final IMetadataRepositoryManager manager = null;
+        IMetadataRepositoryManager manager = null;
+        final File agentDir = Utils.temporaryAgentLocation();
         try
         {
             getLock().readLock().lock();
-            final ICompositeRepository<IInstallableUnit> compositeRepository =
-                loadMetadataCompositeRepository( manager, location );
-            compositeRepository.addChild( childLocation );
+            manager = getMetadataRepositoryManager( agentDir.toURI() );
+            final ICompositeRepository<IInstallableUnit> compositeRepository = loadMetadataCompositeRepository(
+                manager, location
+            );
+            for ( final URI childLocation : childLocations )
+            {
+                compositeRepository.addChild( childLocation );
+            }
+        }
+        catch ( final ProvisionException e )
+        {
+            throw new RuntimeException( "Cannot write composite metadata repository. Reason: " + e.getMessage(), e );
         }
         finally
         {
@@ -83,19 +116,30 @@ public class CompositeRepositoryService
             {
                 manager.getAgent().stop();
             }
+            Utils.deleteIfPossible( agentDir );
             getLock().readLock().unlock();
         }
     }
 
-    public void removeMetadataRepository( final URI location, final URI childLocation )
+    public void removeMetadataRepository( final URI location, final URI... childLocations )
     {
-        final IMetadataRepositoryManager manager = null;
+        IMetadataRepositoryManager manager = null;
+        final File agentDir = Utils.temporaryAgentLocation();
         try
         {
             getLock().readLock().lock();
-            final ICompositeRepository<IInstallableUnit> compositeRepository =
-                loadMetadataCompositeRepository( manager, location );
-            compositeRepository.removeChild( childLocation );
+            manager = getMetadataRepositoryManager( agentDir.toURI() );
+            final ICompositeRepository<IInstallableUnit> compositeRepository = loadMetadataCompositeRepository(
+                manager, location
+            );
+            for ( final URI childLocation : childLocations )
+            {
+                compositeRepository.removeChild( childLocation );
+            }
+        }
+        catch ( final ProvisionException e )
+        {
+            throw new RuntimeException( "Cannot write composite metadata repository. Reason: " + e.getMessage(), e );
         }
         finally
         {
@@ -103,12 +147,14 @@ public class CompositeRepositoryService
             {
                 manager.getAgent().stop();
             }
+            Utils.deleteIfPossible( agentDir );
             getLock().readLock().unlock();
         }
     }
 
-    private ICompositeRepository<IArtifactKey> loadArtifactsCompositeRepository( final IArtifactRepositoryManager manager,
-                                                                                 final URI location )
+    private ICompositeRepository<IArtifactKey> loadArtifactsCompositeRepository(
+        final IArtifactRepositoryManager manager,
+        final URI location )
     {
         try
         {
@@ -125,7 +171,7 @@ public class CompositeRepositoryService
             {
                 repository =
                     manager.createRepository( location, "generated-composite-metadata-repository",
-                        IArtifactRepositoryManager.TYPE_COMPOSITE_REPOSITORY, null );
+                                              IArtifactRepositoryManager.TYPE_COMPOSITE_REPOSITORY, null );
             }
             if ( repository == null )
             {
@@ -152,7 +198,7 @@ public class CompositeRepositoryService
         {
             throw new RuntimeException( "Cannot load composite repository as there is no provisioning agent provider" );
         }
-        final IProvisioningAgent agent = getProvider().createAgent( location.resolve( ".p2" ) );
+        final IProvisioningAgent agent = createProvisioningAgent( location );
         final IArtifactRepositoryManager manager =
             (IArtifactRepositoryManager) agent.getService( IArtifactRepositoryManager.SERVICE_NAME );
         if ( manager == null )
@@ -163,8 +209,9 @@ public class CompositeRepositoryService
         return manager;
     }
 
-    private ICompositeRepository<IInstallableUnit> loadMetadataCompositeRepository( final IMetadataRepositoryManager manager,
-                                                                                    final URI location )
+    private ICompositeRepository<IInstallableUnit> loadMetadataCompositeRepository(
+        final IMetadataRepositoryManager manager,
+        final URI location )
     {
         try
         {
@@ -181,7 +228,7 @@ public class CompositeRepositoryService
             {
                 repository =
                     manager.createRepository( location, "generated-composite-metadata-repository",
-                        IMetadataRepositoryManager.TYPE_COMPOSITE_REPOSITORY, null );
+                                              IMetadataRepositoryManager.TYPE_COMPOSITE_REPOSITORY, null );
             }
             if ( repository == null )
             {
@@ -208,7 +255,7 @@ public class CompositeRepositoryService
         {
             throw new RuntimeException( "Cannot load composite repository as there is no provisioning agent provider" );
         }
-        final IProvisioningAgent agent = getProvider().createAgent( location.resolve( ".p2" ) );
+        final IProvisioningAgent agent = createProvisioningAgent( location );
         final IMetadataRepositoryManager manager =
             (IMetadataRepositoryManager) agent.getService( IMetadataRepositoryManager.SERVICE_NAME );
         if ( manager == null )
