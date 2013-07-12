@@ -42,7 +42,7 @@ git commit -a -m "Bumped version number to 1.0.4"
 git checkout master
 git merge --no-ff release-1.0.4
 git tag -a 1.0.4 -m "Release 1.0.4"
- 
+
 git checkout develop
 git merge --no-ff release-1.0.4
 ```
