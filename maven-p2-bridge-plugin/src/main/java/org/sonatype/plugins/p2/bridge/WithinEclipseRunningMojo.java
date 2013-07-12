@@ -190,7 +190,7 @@ abstract class WithinEclipseRunningMojo
         // Better implementation that looks up the exported packages from the artifact
         launchProperties.put(
             "org.osgi.framework.system.packages.extra",
-            "org.sonatype.p2.bridge;version=\"1.1.6\",org.sonatype.p2.bridge.model;version=\"1.1.6\"" );
+            "org.sonatype.p2.bridge;version=\"1.1.7\",org.sonatype.p2.bridge.model;version=\"1.1.7\"" );
 
         return launchProperties;
     }

@@ -759,7 +759,7 @@ public class ArtifactRepositoryService
         if ( manager == null )
         {
             throw new RuntimeException(
-                "Cannot load artifact repository as artifact repository manager coud not be created" );
+                "Cannot load artifact repository as artifact repository manager could not be created" );
         }
         return manager;
     }
