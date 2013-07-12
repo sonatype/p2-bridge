@@ -7,32 +7,37 @@ This is a Nexus plugin that encapsulates P2 functionality.
 As this plugin is "special", it requires totally different release procedure
 than the one we use for "normal" projects.
 
+### Prerequisites
+
+* Maven 3.0.4+
+* Java6+
+
 ###Prepare project (on developer workstation)
 * Ensure that everything is committed
 ```
 git status
 ```
 
-* Make a release branch
+* Make a release branch from develop branch
 ```
 git checkout -b release-1.0.4 develop
 ```
 
 * Set version on all projects to an odd version
 ```
-mvn -Dtycho.mode=maven org.eclipse.tycho:tycho-versions-plugin:0.13.0:set-version -DnewVersion=1.0.4
+mvn -Dtycho.mode=maven org.eclipse.tycho:tycho-versions-plugin:0.18.0:set-version -DnewVersion=1.0.4
 ```
 
-* Check that there is no trace left of previous version (e.g. 1.0.3)
+* Check that there is no trace left of previous version (e.g. 1.0.3 and 1.0.3-SNAPSHOT)
 * Verify that MANIFEST.MF imported/exported packages are correct
 * Verify that no SNAPSHOT dependencies are used (search for SNAPSHOT)
-* Verify that bundle version has no ".qualifier" (search for qualifier)
+* Verify that bundle version has no ".qualifier" (search for qualifier), if found, remove it.
 * Build it
 ```
-m3 clean install
+mvn clean install
 ```
 
-* Commit
+* Commit changes
 ```
 git commit -a -m "Bumped version number to 1.0.4"
 ```
@@ -51,17 +56,17 @@ git merge --no-ff release-1.0.4
 git branch -d release-1.0.4
 ```
 
+* Bump version on develop branch
+```
+git checkout develop
+mvn -Dtycho.mode=maven org.eclipse.tycho:tycho-versions-plugin:0.18.0:set-version -DnewVersion=1.0.5-SNAPSHOT
+git commit -a -m "Bumped version number to 1.0.5-SNAPSHOT"
+```
+
 * Push back to origin
 ```
 git push
 git push --tags
-```
-
-* Bump version on develop branch
-```
-git checkout develop
-mvn -Dtycho.mode=maven org.sonatype.tycho:tycho-versions-plugin:0.11.0-SNAPSHOT:set-version -DnewVersion=1.0.5-SNAPSHOT
-git commit -a -m "Bumped version number to 1.0.5-SNAPSHOT"
 ```
 
 * Check that there is no trace left of released version (e.g. 1.0.4)
@@ -70,15 +75,15 @@ git commit -a -m "Bumped version number to 1.0.5-SNAPSHOT"
 ### Perform release (on release machine)
 
 * SSH to release machine
-* Pull changes
-```
-cd (p2-touchpoints/p2/bridge/sisu-assembler/sisu-assembler-gshell/sisu-recipes)
-git pull
-```
-
 * Ensure on master branch
 ```
 git checkout master
+```
+
+* Pull changes (or fetch+rebase, as you want)
+```
+cd p2-bridge/
+git pull
 ```
 
 * Release it
