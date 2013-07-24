@@ -58,6 +58,11 @@
             <type>zip</type>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>org.sonatype.sisu.litmus</groupId>
+            <artifactId>litmus-testsupport</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

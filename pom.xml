@@ -187,7 +187,13 @@
         <artifactId>javax.inject</artifactId>
         <version>1</version>
       </dependency>
-
+      
+      <dependency>
+          <groupId>org.sonatype.sisu.litmus</groupId>
+          <artifactId>litmus-testsupport</artifactId>
+          <version>1.6</version>
+      </dependency>
+      
     </dependencies>
   </dependencyManagement>
 
