@@ -12,15 +12,12 @@ than the one we use for "normal" projects.
 * Maven 3.0.4+
 * Java6+
 
-###Prepare project (on developer workstation)
-* Ensure that everything is committed
+### Prepare release (on release machine)
+* SSH to release machine
+* Clone and ensure on master branch
 ```
-git status
-```
-
-* Make a release branch from develop branch
-```
-git checkout -b release-1.0.4 develop
+git clone git@github.com:sonatype/p2-bridge.git
+git checkout master
 ```
 
 * Set version on all projects to the release version (ie. was 1.0.4-SNAPSHOT, set it to 1.0.4)
@@ -42,24 +39,30 @@ mvn clean install
 git commit -a -m "Bumped version number to 1.0.4"
 ```
 
-* Merge release branch to mater/develop and tag release
+* Tag release
 ```
-git checkout master
-git merge --no-ff release-1.0.4
 git tag -a 1.0.4 -m "Release 1.0.4"
-git checkout develop
-git merge --no-ff release-1.0.4
 ```
 
-* Drop release branch
+### Perform release (on release machine)
 ```
-git branch -d release-1.0.4
+mvn clean deploy -Prelease
 ```
 
-* Bump version on develop branch to next snapshot
+* Bump version to next snapshot
 ```
-git checkout develop
 mvn -Dtycho.mode=maven org.eclipse.tycho:tycho-versions-plugin:0.18.0:set-version -DnewVersion=1.0.5-SNAPSHOT
+```
+
+* Check that there is no trace left of released version (e.g. 1.0.4)
+* Verify that imported/exported packages are correct (those will be still 1.0.4, release version)
+* Build it
+```
+mvn clean install
+```
+
+* Commit changes
+```
 git commit -a -m "Bumped version number to 1.0.5-SNAPSHOT"
 ```
 
@@ -67,28 +70,6 @@ git commit -a -m "Bumped version number to 1.0.5-SNAPSHOT"
 ```
 git push
 git push --tags
-```
-
-* Check that there is no trace left of released version (e.g. 1.0.4) on develop branch
-* Verify that imported/exported packages are correct (those will be still 1.0.4, release version)
-
-### Perform release (on release machine)
-
-* SSH to release machine
-* Ensure on master branch
-```
-git checkout master
-```
-
-* Pull changes (or fetch+rebase, as you want)
-```
-cd p2-bridge/
-git pull
-```
-
-* Release it
-```
-mvn clean deploy -Prelease
 ```
 
 * Have a beer
