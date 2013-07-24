@@ -239,6 +239,16 @@
             <resolver>packed</resolver>
           </configuration>
         </plugin>
+        
+        <plugin>
+          <groupId>com.mycila.maven-license-plugin</groupId>
+          <artifactId>maven-license-plugin</artifactId>
+          <configuration>
+            <excludes combine.children="append">
+              <exclude>p2-runtime-3.7-sonatype-fork/src/main/resources/eclipse/**</exclude>
+            </excludes>
+          </configuration>
+        </plugin>
       </plugins>
     </pluginManagement>
     <plugins>
