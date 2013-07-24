@@ -1,7 +1,5 @@
 # P2 Bridge
 
-This is a Nexus plugin that encapsulates P2 functionality.
-
 ## Releasing
 
 As this plugin is "special", it requires totally different release procedure
