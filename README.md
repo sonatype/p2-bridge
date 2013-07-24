@@ -45,6 +45,7 @@ git tag -a 1.0.4 -m "Release 1.0.4"
 ```
 
 ### Perform release (on release machine)
+* Release it
 ```
 mvn clean deploy -Prelease
 ```
