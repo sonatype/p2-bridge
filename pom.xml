@@ -17,9 +17,9 @@
   </prerequisites>
 
   <parent>
-    <groupId>org.sonatype.forge</groupId>
-    <artifactId>forge-parent</artifactId>
-    <version>38</version>
+    <groupId>org.sonatype.buildsupport</groupId>
+    <artifactId>public-parent</artifactId>
+    <version>3</version>
   </parent>
 
   <groupId>org.sonatype.p2.bridge</groupId>
