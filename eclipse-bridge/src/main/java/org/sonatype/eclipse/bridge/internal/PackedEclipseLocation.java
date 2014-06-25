@@ -15,16 +15,15 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 
-import org.codehaus.plexus.archiver.UnArchiver;
-import org.codehaus.plexus.util.FileUtils;
-import org.codehaus.plexus.util.IOUtil;
 import org.sonatype.eclipse.bridge.EclipseLocation;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.zeroturnaround.zip.ZipUtil;
 
 public class PackedEclipseLocation
     implements EclipseLocation
 {
-
-    private final UnArchiver unArchiver;
 
     private final File eclipseArchive;
 
@@ -34,24 +33,21 @@ public class PackedEclipseLocation
 
     private final boolean reuseExisting;
 
-    public PackedEclipseLocation( final File eclipseArchive, final UnArchiver unArchiver )
+    public PackedEclipseLocation( final File eclipseArchive )
     {
-        this( eclipseArchive, null, false, unArchiver );
+        this( eclipseArchive, null, false );
     }
 
-    public PackedEclipseLocation( final File eclipseArchive, final File location, final boolean reuseExisting,
-                                  final UnArchiver unArchiver )
+    public PackedEclipseLocation( final File eclipseArchive, final File location, final boolean reuseExisting )
     {
         this.location = new File( location == null ? createTemporaryLocation() : location, "eclipse" );
         this.reuseExisting = reuseExisting;
-        this.unArchiver = unArchiver;
         this.eclipseArchive = eclipseArchive;
     }
 
-    public PackedEclipseLocation( final URI eclipseArchive, final File location, final boolean reuseExisting,
-                                  final UnArchiver unArchiver )
+    public PackedEclipseLocation( final URI eclipseArchive, final File location, final boolean reuseExisting )
     {
-        this( reuseExisting && location != null && location.exists() ? null : copyArchive( eclipseArchive ), location, reuseExisting, unArchiver );
+        this( reuseExisting && location != null && location.exists() ? null : copyArchive( eclipseArchive ), location, reuseExisting );
     }
 
     public File get()
@@ -72,9 +68,8 @@ public class PackedEclipseLocation
                     }
 
                     location.mkdirs();
-                    unArchiver.setSourceFile( eclipseArchive );
-                    unArchiver.setDestDirectory( location.getParentFile() );
-                    unArchiver.extract();
+
+                    ZipUtil.unpack( eclipseArchive, location.getParentFile() );
 
                 }
                 extracted = true;
@@ -96,7 +91,7 @@ public class PackedEclipseLocation
             in = new BufferedInputStream( eclipseArchive.toURL().openStream() );
             final File tempFile = File.createTempFile( "eclipse", ".zip" );
             out = new BufferedOutputStream( new FileOutputStream( tempFile ) );
-            IOUtil.copy( in, out );
+            IOUtils.copy( in, out );
             return tempFile;
         }
         catch ( final Exception e )
@@ -105,8 +100,8 @@ public class PackedEclipseLocation
         }
         finally
         {
-            IOUtil.close( in );
-            IOUtil.close( out );
+            IOUtils.closeQuietly( in );
+            IOUtils.closeQuietly( out );
         }
     }
 

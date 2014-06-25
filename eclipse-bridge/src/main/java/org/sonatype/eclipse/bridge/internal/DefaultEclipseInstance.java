@@ -18,13 +18,14 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.sonatype.eclipse.bridge.EclipseInstance;
+import org.sonatype.eclipse.bridge.EclipseLocation;
+
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.sonatype.eclipse.bridge.EclipseInstance;
-import org.sonatype.eclipse.bridge.EclipseLocation;
 
 class DefaultEclipseInstance
     implements EclipseInstance
