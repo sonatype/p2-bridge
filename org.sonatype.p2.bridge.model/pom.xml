@@ -22,13 +22,6 @@
 
     <name>P2 Bridge :: Model</name>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.codehaus.plexus</groupId>
-            <artifactId>plexus-utils</artifactId>
-        </dependency>
-    </dependencies>
-
     <build>
         <plugins>
             <plugin>

@@ -10,35 +10,31 @@ package org.sonatype.eclipse.bridge.internal;
 import java.io.File;
 import java.net.URI;
 
-import org.codehaus.plexus.archiver.UnArchiver;
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
+import javax.inject.Named;
+
 import org.sonatype.eclipse.bridge.EclipseLocation;
 import org.sonatype.eclipse.bridge.EclipseLocationFactory;
 
-@Component( role = EclipseLocationFactory.class )
+@Named
 public class DefaultEclipseLocationFactory
     implements EclipseLocationFactory
 {
 
-    @Requirement( hint = "zip" )
-    private UnArchiver unArchiver;
-
     public EclipseLocation createPackedEclipseLocation( final File eclipseArchive )
     {
-        return new PackedEclipseLocation( eclipseArchive, unArchiver );
+        return new PackedEclipseLocation( eclipseArchive );
     }
 
     public EclipseLocation createPackedEclipseLocation( final File eclipseArchive, final File location,
                                                         final boolean reuseExisting )
     {
-        return new PackedEclipseLocation( eclipseArchive, location, reuseExisting, unArchiver );
+        return new PackedEclipseLocation( eclipseArchive, location, reuseExisting );
     }
 
     public EclipseLocation createPackedEclipseLocation( final URI eclipseArchive, final File location,
                                                         final boolean reuseExisting )
     {
-        return new PackedEclipseLocation( eclipseArchive, location, reuseExisting, unArchiver );
+        return new PackedEclipseLocation( eclipseArchive, location, reuseExisting );
     }
 
     public EclipseLocation createStaticEclipseLocation( final File location )

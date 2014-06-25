@@ -24,8 +24,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.codehaus.plexus</groupId>
-            <artifactId>plexus-component-annotations</artifactId>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -33,22 +33,16 @@
             <artifactId>org.eclipse.osgi</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.codehaus.plexus</groupId>
-            <artifactId>plexus-archiver</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.codehaus.plexus</groupId>
-                    <artifactId>plexus-container-default</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>org.zeroturnaround</groupId>
+            <artifactId>zt-zip</artifactId>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.plexus</groupId>
-                <artifactId>plexus-component-metadata</artifactId>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>sisu-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>

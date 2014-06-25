@@ -7,12 +7,13 @@
  */
 package org.sonatype.eclipse.bridge.internal;
 
-import org.codehaus.plexus.component.annotations.Component;
+import javax.inject.Named;
+
 import org.sonatype.eclipse.bridge.EclipseBridge;
 import org.sonatype.eclipse.bridge.EclipseInstance;
 import org.sonatype.eclipse.bridge.EclipseLocation;
 
-@Component( role = EclipseBridge.class )
+@Named
 public class DefaultEclipseBridge
     implements EclipseBridge
 {
