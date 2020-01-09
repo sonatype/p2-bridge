@@ -3,9 +3,9 @@ library('jenkins-shared')
 
 mavenReleasePipeline(javaVersion: 'Java 6', mavenVersion: 'Maven 3.0.x', mavenOptions: '-Denforcer.skip=true',
     onSuccess: { build, env ->
-      notifyChat(env: env, currentBuild: build, room: 'nxrm-jenkins')
+      notifyChat(env: env, currentBuild: build, room: 'nxrm-notifications')
     },
     onFailure: { build, env ->
-      notifyChat(env: env, currentBuild: build, room: 'nxrm-jenkins')
+      notifyChat(env: env, currentBuild: build, room: 'nxrm-notifications')
     }
 )
